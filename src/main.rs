@@ -1,3 +1,4 @@
+use serialport;
 use std::time::Duration;
 
 fn main() {
@@ -6,7 +7,7 @@ fn main() {
         .open()
         .expect("Failed to open port");
 
-    let output: Vec<u8> = vec![2, 129, 8, 0, 0, 144, 172, 2, 0, 0, 96, 3]; // Setsound type
+    let output: Vec<u8> = vec![2, 129, 8, 0, 0, 144, 172, 2, 0, 0, 96, 3]; // Setsound type (0)
 
     port.write(&output[..]).expect("Could not write");
 }
