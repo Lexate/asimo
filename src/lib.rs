@@ -38,11 +38,25 @@ pub mod comms {
 }
 
 pub mod proto {
-    /*struct AmProto {
+    enum Methods {
+
+    }
+
+    struct AmProto {
         msgtype: u8,
-        length: ,
-        subcmd: ,
+        length: u8, // I think
+        subcmd: u8,
         payload: ,
-        crc: ,
-    }*/
+        crc: u8,
+    }
+
+    struct Amg3 {
+        id: u8,
+        length: u16,
+        trans_id: u8,
+        message_type: u16, // Can be u8 if the first byte is larger than 0x7F
+        payload_length: u8,
+        payload: ,
+        crc: u8,
+    }
 }
