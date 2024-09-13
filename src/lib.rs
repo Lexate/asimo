@@ -41,12 +41,59 @@ pub mod comms {
 }
 
 pub mod proto {
-    struct AmProto {
+    const CRC_TABLE: [u8; 256] = [
+        0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
+        252, 162, 64, 30, 95, 1, 227, 189, 62, 96, 130, 220, 35, 125, 159, 193, 66, 28, 254, 160,
+        225, 191, 93, 3, 128, 222, 60, 98, 190, 224, 2, 92, 223, 129, 99, 61, 124, 34, 192, 158,
+        29, 67, 161, 255, 70, 24, 250, 164, 39, 121, 155, 197, 132, 218, 56, 102, 229, 187, 89, 7,
+        219, 133, 103, 57, 186, 228, 6, 88, 25, 71, 165, 251, 120, 38, 196, 154, 101, 59, 217, 135,
+        4, 90, 184, 230, 167, 249, 27, 69, 198, 152, 122, 36, 248, 166, 68, 26, 153, 199, 37, 123,
+        58, 100, 134, 216, 91, 5, 231, 185, 140, 210, 48, 110, 237, 179, 81, 15, 78, 16, 242, 172,
+        47, 113, 147, 205, 17, 79, 173, 243, 112, 46, 204, 146, 211, 141, 111, 49, 178, 236, 14,
+        80, 175, 241, 19, 77, 206, 144, 114, 44, 109, 51, 209, 143, 12, 82, 176, 238, 50, 108, 142,
+        208, 83, 13, 239, 177, 240, 174, 76, 18, 145, 207, 45, 115, 202, 148, 118, 40, 171, 245,
+        23, 73, 8, 86, 180, 234, 105, 55, 213, 139, 87, 9, 235, 181, 54, 104, 138, 212, 149, 203,
+        41, 119, 244, 170, 72, 22, 233, 183, 85, 11, 136, 214, 52, 106, 43, 117, 151, 201, 74, 20,
+        246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
+    ];
+
+    pub fn calc_crc(array: &Vec<u8>, start: usize) -> u8 {
+        let mut crc = 0;
+        for i in &array[start..] {
+            crc = CRC_TABLE[(crc ^ i) as usize]
+        }
+        crc
+    }
+
+    pub struct AmProto {
         msgtype: u8,
-        length: u8, // I think
         subcmd: u8,
         payload: inParams,
-        crc: u8,
+    }
+
+    impl AmProto {
+        pub fn to_byte_array(&self) -> Vec<u8> {
+            let mut array = Vec::new();
+
+            array.push(0x02); // STX
+            array.push(self.msgtype); // msgtype
+                                      // length, (added later)
+            array.push(self.subcmd); // subcmd
+            array.append(self.payload.to_byte_array().as_mut());
+            array.insert(2, (array.len() - 2) as u8); //length, -2 to skip STX and msgtype
+            array.push(calc_crc(&array, 1)); //crc, 1 to skip STX
+            array.push(0x03); // ETX
+
+            array
+        }
+        pub fn new(command: inParams) -> Self {
+            let (msgtype, subcmd) = get_msgtype(command);
+            Self {
+                msgtype: msgtype.try_into().expect("amg3 command sent to amproto"),
+                subcmd,
+                payload: command,
+            }
+        }
     }
 
     struct Amg3 {
@@ -58,7 +105,7 @@ pub mod proto {
         payload: inParams,
         crc: u8,
     }
-
+    #[derive(Clone, Copy)]
     enum tILoopSamplerLoops {
         LoopsamplerLoopA = 0,         /* A */
         LoopsamplerLoopF = 1,         /* F */
@@ -68,12 +115,14 @@ pub mod proto {
         LoopsamplerLoopG3 = 5,        /* Guide 3 */
         LoopsamplerNumberOfLoops = 6, /*  */
     }
+    #[derive(Clone, Copy)]
     enum tIMowerApp_MowerMode {
         ImowerappModeAuto = 0,   /* Auto */
         ImowerappModeManual = 1, /* Manual */
         ImowerappModeHome = 2,   /* Home */
         ImowerappModeDemo = 3,   /* Demo */
     }
+    #[derive(Clone, Copy)]
     enum tIMowerApp_State {
         ImowerappStateOff = 0,              /* Off */
         ImowerappStateWaitForSafetypin = 1, /* Wait for safety pin */
@@ -85,6 +134,7 @@ pub mod proto {
         ImowerappStateRestricted = 7,       /* Restricted */
         ImowerappStateError = 8,            /* Error */
     }
+    #[derive(Clone, Copy)]
     enum tReturn {
         Ok = 0,            /* OK */
         EUndefined = 1,    /* Undefined error */
@@ -98,6 +148,7 @@ pub mod proto {
         IBusy = 129,       /* Info: Busy. No action needed */
         IQueued = 130,     /* Info: The call put in queue */
     }
+    #[derive(Clone, Copy)]
     enum tDeviceTypeGroup {
         DeviceTypeGroupUndefined = 0,     /*  */
         DeviceTypeGroupGpsBoard = 1,      /*  */
@@ -121,6 +172,7 @@ pub mod proto {
         DeviceTypeGroupSwUltrasonic = 35, /*  */
         DeviceTypeGroupSwCom = 36,        /*  */
     }
+    #[derive(Clone, Copy)]
     enum tMowerDeviceType {
         MowerDeviceTypeUndefined = 0, /*  */
         MowerDeviceTypeB = 1,         /*  */
@@ -141,6 +193,7 @@ pub mod proto {
         MowerDeviceTypeQ = 16,        /*  */
         MowerDeviceTypeNoMore = 17,   /*  */
     }
+    #[derive(Clone, Copy)]
     enum tMowerVariantType {
         MowerVariantTypeUndefined = 255, /*  */
         MowerVariantTypeOrg = 0,         /*  */
@@ -151,6 +204,7 @@ pub mod proto {
         MowerVariantTypeF = 5,           /*  */
         MowerVariantTypeNoMore = 6,      /*  */
     }
+    #[derive(Clone, Copy)]
     enum tSoundType {
         SoundKeyClick = 0,             /* Key Click */
         SoundClick = 1,                /* Click Sound */
@@ -168,7 +222,8 @@ pub mod proto {
         SoundTone1 = 13,               /* Tone 1 minute */
         SoundOff = 14,                 /* Sound Off */
     }
-    enum inParams {
+    #[derive(Clone, Copy)]
+    pub enum inParams {
         DeviceInformationGetDeviceIdentification(),
         RealTimeDataGetWheelMotorData(),
         SystemSettingsSetHeadlightEnabled(u8),
@@ -209,6 +264,27 @@ pub mod proto {
         ChargerIsChargingPowerConnected(),
         PlannerClearOverride(),
     }
+    impl inParams {
+        fn to_byte_array(&self) -> Vec<u8> {
+            match *self {
+                inParams::SystemSettingsSetHeadlightEnabled(p) => vec![p],
+                inParams::WheelsGetSpeed(p) => vec![p],
+                inParams::WheelsGetRotationCounter(p) => vec![p],
+                inParams::LoopSamplerGetLoopSignalMaster(p) => vec![p as u8],
+                inParams::HardwareControlWheelMotorsPower(p, q) => {
+                    [p.to_le_bytes(), q.to_le_bytes()].concat()
+                }
+                inParams::MowerAppSetMode(p) => vec![p as u8],
+                inParams::SystemSettingsSetLoopDetection(p) => vec![p],
+                inParams::HeightMotorSetHeight(p) => vec![p],
+                inParams::CollisionSetSimulation(p) => vec![p as u8],
+                inParams::CollisionSetSimulatedStatus(p) => Vec::from(p.to_le_bytes()),
+                inParams::SoundSetSoundType(p) => vec![p as u8],
+                _ => Vec::new(),
+            }
+        }
+    }
+    #[derive(Clone, Copy)]
     enum outParams {
         DeviceInformationGetDeviceIdentification(
             tDeviceTypeGroup,
@@ -294,7 +370,7 @@ pub mod proto {
         PlannerClearOverride(),
     }
 
-    fn getmsgtype(param: inParams) -> (u16, u8) {
+    fn get_msgtype(param: inParams) -> (u16, u8) {
         match param {
             inParams::DeviceInformationGetDeviceIdentification() => (22, 0),
             inParams::RealTimeDataGetWheelMotorData() => (20, 2),
