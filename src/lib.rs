@@ -72,7 +72,7 @@ pub mod proto {
     }
 
     impl AmProto {
-        pub fn to_byte_array(&self) -> Vec<u8> {
+        fn to_byte_array(&self) -> Vec<u8> {
             let mut array = Vec::new();
 
             array.push(0x02); // STX
@@ -86,7 +86,7 @@ pub mod proto {
 
             array
         }
-        pub fn new(command: inParams) -> Self {
+        fn new(command: inParams) -> Self {
             let (msgtype, subcmd) = get_msgtype(command);
             Self {
                 msgtype: msgtype.try_into().expect("amg3 command sent to amproto"),
@@ -98,12 +98,47 @@ pub mod proto {
 
     struct Amg3 {
         id: u8,
-        length: u16,
+        //length: u16,
         trans_id: u8,
         message_type: u16, // Can be u8 if the first byte is larger than 0x7F
-        payload_length: u8,
+        subcmd: u8,
+        //payload_length: u8,
         payload: inParams,
-        crc: u8,
+        //crc: u8,
+    }
+
+    impl Amg3 {
+        fn to_byte_array(&self) -> Vec<u8> {
+            let mut array = Vec::new();
+
+            array.push(0x02); // Stx
+            array.push(self.id); // Id
+                                 // length
+            array.push(self.trans_id); // Transision id
+            array.extend_from_slice(self.message_type.to_be_bytes().as_slice()); // is all of amproto BE hopefully not because then i have more work to do
+
+            let mut payload = self.payload.to_byte_array();
+            array.push((payload.len() as u8) + 1); // Payload length, add 1 for subcmd
+            array.push(self.subcmd); // subcmd
+            array.append(payload.as_mut()); // Payload
+
+            array.splice(2..2, (array.len() as u16).to_le_bytes()); // Length
+
+            array.push(calc_crc(&array, 1)); // Crc
+            array.push(0x03); // ETX
+
+            array
+        }
+        fn new(command: inParams) -> Self {
+            let (message_type, subcmd) = get_msgtype(command);
+            Self {
+                id: 0x81,    // this seems to always be 0x81
+                trans_id: 0, // this always seems to be 0 for some reason
+                message_type: message_type | 0x8000,
+                subcmd,
+                payload: command,
+            }
+        }
     }
     #[derive(Clone, Copy)]
     enum tILoopSamplerLoops {
@@ -223,7 +258,7 @@ pub mod proto {
         SoundOff = 14,                 /* Sound Off */
     }
     #[derive(Clone, Copy)]
-    pub enum inParams {
+    enum inParams {
         DeviceInformationGetDeviceIdentification(),
         RealTimeDataGetWheelMotorData(),
         SystemSettingsSetHeadlightEnabled(u8),

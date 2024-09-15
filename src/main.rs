@@ -18,8 +18,4 @@ fn main() {
         "{}",
         asimo::proto::calc_crc(&vec![2, 129, 8, 0, 0, 144, 172, 2, 0, 0,], 1)
     );
-    let slask = asimo::proto::AmProto::new(
-        asimo::proto::inParams::DeviceInformationGetDeviceIdentification(),
-    );
-    println!("{:?}", slask.to_byte_array());
 }
