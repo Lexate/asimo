@@ -61,7 +61,7 @@ pub mod proto {
         246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
     ];
 
-    pub fn calc_crc(array: &Vec<u8>, start: usize) -> u8 {
+    fn calc_crc(array: &Vec<u8>, start: usize) -> u8 {
         let mut crc = 0;
         for i in &array[start..] {
             crc = CRC_TABLE[(crc ^ i) as usize]
@@ -69,7 +69,7 @@ pub mod proto {
         crc
     }
 
-    pub struct AmProto {
+    struct AmProto {
         msgtype: u8,
         subcmd: u8,
         payload: inParams,
