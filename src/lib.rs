@@ -1,6 +1,3 @@
-#![allow(non_camel_case_types)] // I should proably change the python code
-#![allow(unused)] // for now
-
 mod gen_types;
 pub use crate::gen_types::types;
 
