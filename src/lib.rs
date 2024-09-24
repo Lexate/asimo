@@ -73,6 +73,14 @@ pub mod proto {
     }
 
     impl AmProto {
+        fn new(command: inParams) -> Self {
+            let (msgtype, subcmd) = get_msgtype(command);
+            Self {
+                msgtype: msgtype.try_into().expect("amg3 command sent to amproto"),
+                subcmd,
+                payload: command,
+            }
+        }
         fn to_byte_array(&self) -> Vec<u8> {
             let mut array = Vec::new();
 
@@ -86,14 +94,6 @@ pub mod proto {
             array.push(0x03); // ETX
 
             array
-        }
-        fn new(command: inParams) -> Self {
-            let (msgtype, subcmd) = get_msgtype(command);
-            Self {
-                msgtype: msgtype.try_into().expect("amg3 command sent to amproto"),
-                subcmd,
-                payload: command,
-            }
         }
     }
 
@@ -109,6 +109,16 @@ pub mod proto {
     }
 
     impl Amg3 {
+        fn new(command: inParams) -> Self {
+            let (message_type, subcmd) = get_msgtype(command);
+            Self {
+                id: 0x81,    // this seems to always be 0x81
+                trans_id: 0, // this always seems to be 0 for some reason
+                message_type: message_type | 0x8000,
+                subcmd,
+                payload: command,
+            }
+        }
         fn to_byte_array(&self) -> Vec<u8> {
             let mut array = Vec::new();
 
@@ -129,16 +139,6 @@ pub mod proto {
             array.push(0x03); // ETX
 
             array
-        }
-        fn new(command: inParams) -> Self {
-            let (message_type, subcmd) = get_msgtype(command);
-            Self {
-                id: 0x81,    // this seems to always be 0x81
-                trans_id: 0, // this always seems to be 0 for some reason
-                message_type: message_type | 0x8000,
-                subcmd,
-                payload: command,
-            }
         }
     }
 
@@ -169,5 +169,22 @@ pub mod proto {
             4000.. => (Amg3::new(command).to_byte_array(), subcmd),
             _ => (AmProto::new(command).to_byte_array(), subcmd),
         }
+    }
+
+    pub fn decode(response: Vec<u8>) -> Result<outParams, &'static str> {
+        // Check STX and ETX
+        if response.first() != Some(&0x02) {
+            return Err("first byte is not 0x02 (STX)");
+        } else if response.last() != Some(&0x03) {
+            return Err("last byte is not 0x03 (ETX)");
+        }
+        // Check crc
+        if response.get(response.len().wrapping_sub(2))
+            != Some(&calc_crc(&response[..response.len() - 2].to_vec(), 1))
+        {
+            return Err("crc does not match");
+        }
+
+        Ok(outParams::SoundSetSoundType(tSoundType::SoundKeyClick))
     }
 }
