@@ -1,4 +1,5 @@
 use asimo::{comms, proto, types};
+use core::time;
 use std::{thread::sleep, time::Duration};
 //TODO: Error handling
 
@@ -43,20 +44,56 @@ fn main() {
         .expect("Could not establish comms");
 
     let resp = serial
+        .send_message(proto::encode(types::inParams::DeviceInformationGetDeviceIdentification()).0)
+        .unwrap();
+    println!("{:?}", resp);
+
+    serial
+        .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
+        .unwrap();
+
+    let resp = serial
+        .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
+        .unwrap();
+    println!("{:?}", resp);
+
+    loop {
+        let state = &serial
+            .send_message(proto::encode(types::inParams::MowerAppGetState()).0)
+            .unwrap()[10..10];
+
+        if state.first().unwrap() == &6 {
+            serial
+                .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
+                .unwrap();
+            println!("*******************************************");
+            break;
+        }
+        sleep(Duration::from_millis(500));
+    }
+
+    // Confirmation beep
+    serial
         .send_message(
             proto::encode(types::inParams::SoundSetSoundType(
-                types::tSoundType::SoundClick,
+                types::tSoundType::SoundDoubleBeep,
             ))
             .0,
         )
         .unwrap();
 
-    println!("{:?}", resp);
-    //sleep(Duration::from_millis(20));
-    //serial
-    //    .write(&proto::encode(types::inParams::MowerAppPause()).0[..])
-    //    .unwrap();
-    //sleep(Duration::from_millis(20));
+    for i in 1..100 {
+        let resp = serial.send_message(motor(0.30, -0.30)).unwrap();
+        println!("{:?}", resp);
 
-    //serial.write(&motor(0.3, 0.3)[..]).unwrap();
+        let resp = serial
+            .send_message(proto::encode(types::inParams::RealTimeDataGetWheelMotorData()).0)
+            .unwrap();
+        println!("{:?}", resp);
+
+        sleep(Duration::from_millis(20));
+    }
+
+    let resp = serial.send_message(motor(0.0, 0.0)).unwrap();
+    println!("{:?}", resp);
 }
