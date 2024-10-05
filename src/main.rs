@@ -2,6 +2,7 @@ use asimo::{
     comms,
     types::{self, inParams},
 };
+use gilrs::{Button, Event, Gilrs};
 use std::{thread::sleep, time::Duration};
 //TODO: Error handling
 
@@ -41,6 +42,19 @@ fn main() {
     let mut serial = comms::Serial::new("/dev/ttyUSB0", 115200, Duration::from_millis(1))
         .expect("Could not establish comms");
 
+    let mut gilrs = Gilrs::new().unwrap();
+    // Iterate over all connected gamepads
+    for (id, gamepad) in gilrs.gamepads() {
+        println!(
+            "{} is {:?}, id: {:?}",
+            gamepad.name(),
+            gamepad.power_info(),
+            id
+        );
+    }
+
+    let mut active_gamepad = None;
+
     let resp = serial
         .send_message(types::inParams::DeviceInformationGetDeviceIdentification())
         .unwrap();
@@ -79,7 +93,43 @@ fn main() {
         ))
         .unwrap();
 
-    for _ in 1..100 {
+    let mut fwd = 0.0;
+    let mut rot = 0.0;
+
+    let mut left;
+    let mut right;
+
+    loop {
+        // Examine new events
+        while let Some(Event { id, .. }) = gilrs.next_event() {
+            active_gamepad = Some(id)
+        }
+
+        if let Some(gamepad) = active_gamepad.map(|id| gilrs.gamepad(id)) {
+            match gamepad.axis_data(gilrs::Axis::LeftStickY) {
+                Some(d) => fwd = d.value(),
+                None => (),
+            };
+            match gamepad.axis_data(gilrs::Axis::RightStickX) {
+                Some(d) => rot = d.value(),
+                None => (),
+            };
+
+            if gamepad.is_pressed(Button::South) { //A
+                println!("Wahoo")
+            }
+            if gamepad.is_pressed(Button::West) { //X
+                break;
+            }
+
+            (left, right) = arcade_drive(rot, fwd, true);
+
+            left = (left * 100.0).round();
+            right = (right * 100.0).round();
+
+            println!("Left: {}, Right: {}", left, right);
+        }
+
         let resp = serial.send_message(motor(0.30, -0.30)).unwrap();
         println!("{:?}", resp);
 
