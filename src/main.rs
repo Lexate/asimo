@@ -1,6 +1,6 @@
 use asimo::{comms, proto, types};
 use core::time;
-use std::{thread::sleep, time::Duration};
+use std::{io::Read, thread::sleep, time::Duration};
 //TODO: Error handling
 
 fn motor(left: f32, right: f32) -> Vec<u8> {
@@ -46,30 +46,32 @@ fn main() {
     let resp = serial
         .send_message(proto::encode(types::inParams::DeviceInformationGetDeviceIdentification()).0)
         .unwrap();
-    println!("{:?}", resp);
+    println!("{:02X?}", resp);
 
     serial
-        .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
+        .send_message(proto::encode(types::inParams::SystemSettingsSetLoopDetection(0)).0)
         .unwrap();
 
     let resp = serial
         .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
         .unwrap();
-    println!("{:?}", resp);
+    println!("{:02X?}", resp);
 
     loop {
-        let state = &serial
+        let state = serial
             .send_message(proto::encode(types::inParams::MowerAppGetState()).0)
-            .unwrap()[10..10];
+            .expect("could not get state");
 
-        if state.first().unwrap() == &6 {
+        println!("State : {:02X?}", state);
+
+        if state.get(9).expect("State smaller than 11") == &6 {
             serial
-                .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
-                .unwrap();
+                .send_message(proto::encode(types::inParams::MowerAppPause()).0)
+                .expect("could not pause");
             println!("*******************************************");
             break;
         }
-        sleep(Duration::from_millis(500));
+        sleep(Duration::from_millis(1000));
     }
 
     // Confirmation beep
@@ -82,7 +84,7 @@ fn main() {
         )
         .unwrap();
 
-    for i in 1..100 {
+    for _ in 1..100 {
         let resp = serial.send_message(motor(0.30, -0.30)).unwrap();
         println!("{:?}", resp);
 
