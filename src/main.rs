@@ -10,7 +10,10 @@ fn motor(left: f32, right: f32) -> inParams {
     let left = f32::clamp(left, -1.0, 1.0);
     let right = f32::clamp(right, -1.0, 1.0);
 
-    types::inParams::HardwareControlWheelMotorsPower((left * 100.0) as i16, (right * 100.0) as i16)
+    types::inParams::HardwareControlWheelMotorsPower(
+        (left * 100.0).round() as i16,
+        (right * 100.0).round() as i16,
+    )
 }
 
 fn arcade_drive(rot: f32, fwd: f32, square: bool) -> (f32, f32) {
@@ -96,8 +99,8 @@ fn main() {
     let mut fwd = 0.0;
     let mut rot = 0.0;
 
-    let mut left;
-    let mut right;
+    let mut left = 0.0;
+    let mut right = 0.0;
 
     loop {
         // Examine new events
@@ -115,22 +118,24 @@ fn main() {
                 None => (),
             };
 
-            if gamepad.is_pressed(Button::South) { //A
+            if gamepad.is_pressed(Button::South) {
+                //A
                 println!("Wahoo")
             }
-            if gamepad.is_pressed(Button::West) { //X
+            if gamepad.is_pressed(Button::West) {
+                //X
                 break;
             }
 
             (left, right) = arcade_drive(rot, fwd, true);
 
-            left = (left * 100.0).round();
-            right = (right * 100.0).round();
+            let lft = (left * 100.0).round() as i16;
+            let rght = (right * 100.0).round() as i16;
 
-            println!("Left: {}, Right: {}", left, right);
+            println!("Left: {}, Right: {}", lft, rght);
         }
 
-        let resp = serial.send_message(motor(0.30, -0.30)).unwrap();
+        let resp = serial.send_message(motor(left, right)).unwrap();
         println!("{:?}", resp);
 
         let resp = serial
