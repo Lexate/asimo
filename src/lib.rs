@@ -2,8 +2,11 @@ mod gen_types;
 pub use crate::gen_types::types;
 
 pub mod comms {
+    use crate::proto;
     use serialport::SerialPort;
-    use std::{thread::sleep, time::Duration};
+    use std::time::Duration;
+
+    use crate::types;
 
     pub struct Serial {
         port: Box<dyn SerialPort>,
@@ -20,16 +23,7 @@ pub mod comms {
             Ok(Self { port })
         }
 
-        fn read_size(&mut self, lenth: usize) -> Result<Vec<u8>, std::io::Error> {
-            let mut buf = vec![0u8; lenth];
-            match self.port.read_exact(&mut buf) {
-                Ok(_) => return Ok(buf),
-                //Err(e) if e.kind() == std::io::ErrorKind::TimedOut => (),
-                Err(e) => return Err(e),
-            }
-        }
-
-        pub fn send_message(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
+        pub(crate) fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
             self.port.write(&message[..])?;
 
             let mut buf = vec![0u8; 256];
@@ -40,6 +34,14 @@ pub mod comms {
                     Err(e) => eprintln!("{:?}", e),
                 }
             }
+        }
+
+        pub fn send_message(
+            &mut self,
+            message: types::inParams,
+        ) -> Result<Vec<u8>, std::io::Error> {
+            let (bytes, _subcmd) = proto::encode(message);
+            self.send(bytes)
         }
     }
 }

@@ -1,17 +1,15 @@
-use asimo::{comms, proto, types};
-use core::time;
-use std::{io::Read, thread::sleep, time::Duration};
+use asimo::{
+    comms,
+    types::{self, inParams},
+};
+use std::{thread::sleep, time::Duration};
 //TODO: Error handling
 
-fn motor(left: f32, right: f32) -> Vec<u8> {
+fn motor(left: f32, right: f32) -> inParams {
     let left = f32::clamp(left, -1.0, 1.0);
     let right = f32::clamp(right, -1.0, 1.0);
 
-    proto::encode(types::inParams::HardwareControlWheelMotorsPower(
-        (left * 100.0) as i16,
-        (right * 100.0) as i16,
-    ))
-    .0
+    types::inParams::HardwareControlWheelMotorsPower((left * 100.0) as i16, (right * 100.0) as i16)
 }
 
 fn arcade_drive(rot: f32, fwd: f32, square: bool) -> (f32, f32) {
@@ -44,29 +42,29 @@ fn main() {
         .expect("Could not establish comms");
 
     let resp = serial
-        .send_message(proto::encode(types::inParams::DeviceInformationGetDeviceIdentification()).0)
+        .send_message(types::inParams::DeviceInformationGetDeviceIdentification())
         .unwrap();
     println!("{:02X?}", resp);
 
     serial
-        .send_message(proto::encode(types::inParams::SystemSettingsSetLoopDetection(0)).0)
+        .send_message(types::inParams::SystemSettingsSetLoopDetection(0))
         .unwrap();
 
     let resp = serial
-        .send_message(proto::encode(types::inParams::SystemSettingsGetLoopDetection()).0)
+        .send_message(types::inParams::SystemSettingsGetLoopDetection())
         .unwrap();
     println!("{:02X?}", resp);
 
     loop {
         let state = serial
-            .send_message(proto::encode(types::inParams::MowerAppGetState()).0)
+            .send_message(types::inParams::MowerAppGetState())
             .expect("could not get state");
 
         println!("State : {:02X?}", state);
 
         if state.get(9).expect("State smaller than 11") == &6 {
             serial
-                .send_message(proto::encode(types::inParams::MowerAppPause()).0)
+                .send_message(types::inParams::MowerAppPause())
                 .expect("could not pause");
             println!("*******************************************");
             break;
@@ -76,12 +74,9 @@ fn main() {
 
     // Confirmation beep
     serial
-        .send_message(
-            proto::encode(types::inParams::SoundSetSoundType(
-                types::tSoundType::SoundDoubleBeep,
-            ))
-            .0,
-        )
+        .send_message(types::inParams::SoundSetSoundType(
+            types::tSoundType::SoundDoubleBeep,
+        ))
         .unwrap();
 
     for _ in 1..100 {
@@ -89,7 +84,7 @@ fn main() {
         println!("{:?}", resp);
 
         let resp = serial
-            .send_message(proto::encode(types::inParams::RealTimeDataGetWheelMotorData()).0)
+            .send_message(types::inParams::RealTimeDataGetWheelMotorData())
             .unwrap();
         println!("{:?}", resp);
 
