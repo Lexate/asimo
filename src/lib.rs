@@ -2,9 +2,11 @@ mod gen_types;
 pub use crate::gen_types::types;
 
 pub mod comms {
+    use crate::proto;
+    use serialport::SerialPort;
     use std::time::Duration;
 
-    use serialport::SerialPort;
+    use crate::types;
 
     pub struct Serial {
         port: Box<dyn SerialPort>,
@@ -21,21 +23,25 @@ pub mod comms {
             Ok(Self { port })
         }
 
-        pub fn write(&mut self, output: &[u8]) -> Result<usize, std::io::Error> {
-            self.port.write(&output[..])
+        pub(crate) fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
+            self.port.write(&message[..])?;
+
+            let mut buf = vec![0u8; 256];
+            loop {
+                match self.port.read(buf.as_mut_slice()) {
+                    Ok(t) => return Ok(buf[..t].to_vec()),
+                    Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
+                    Err(e) => eprintln!("{:?}", e),
+                }
+            }
         }
 
-        pub fn read(&mut self) -> Result<(usize, Vec<u8>), std::io::Error> {
-            let mut serial_buf: Vec<u8> = vec![0; 256];
-            let bytes_written = self.port.read(serial_buf.as_mut_slice())?;
-            Ok((bytes_written, serial_buf))
-        }
-
-        pub fn write_read(&mut self, output: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-            self.write(output)?;
-            let (_, response) = self.read()?;
-
-            Ok(response)
+        pub fn send_message(
+            &mut self,
+            message: types::inParams,
+        ) -> Result<Vec<u8>, std::io::Error> {
+            let (bytes, _subcmd) = proto::encode(message);
+            self.send(bytes)
         }
     }
 }
