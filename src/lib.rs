@@ -47,6 +47,7 @@ pub mod comms {
 }
 
 pub mod proto {
+
     use crate::gen_types::types::*;
     const CRC_TABLE: [u8; 256] = [
         0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
@@ -151,19 +152,26 @@ pub mod proto {
     impl inParams {
         fn to_byte_array(&self) -> Vec<u8> {
             match *self {
-                inParams::SystemSettingsSetHeadlightEnabled(p) => vec![p],
-                inParams::WheelsGetSpeed(p) => vec![p],
-                inParams::WheelsGetRotationCounter(p) => vec![p],
-                inParams::LoopSamplerGetLoopSignalMaster(p) => vec![p as u8],
-                inParams::HardwareControlWheelMotorsPower(p, q) => {
-                    [p.to_le_bytes(), q.to_le_bytes()].concat()
+                inParams::SystemSettingsSetHeadlightEnabled { headlight } => vec![headlight],
+                inParams::WheelsGetSpeed { index } => vec![index],
+                inParams::WheelsGetRotationCounter { index } => vec![index],
+                inParams::LoopSamplerGetLoopSignalMaster { selectedloop } => {
+                    vec![selectedloop as u8]
                 }
-                inParams::MowerAppSetMode(p) => vec![p as u8],
-                inParams::SystemSettingsSetLoopDetection(p) => vec![p],
-                inParams::HeightMotorSetHeight(p) => vec![p],
-                inParams::CollisionSetSimulation(p) => vec![p as u8],
-                inParams::CollisionSetSimulatedStatus(p) => Vec::from(p.to_le_bytes()),
-                inParams::SoundSetSoundType(p) => vec![p as u8],
+                inParams::HardwareControlWheelMotorsPower {
+                    leftWheelMotorPower,
+                    rightWheelMotorPower,
+                } => [
+                    leftWheelMotorPower.to_le_bytes(),
+                    rightWheelMotorPower.to_le_bytes(),
+                ]
+                .concat(),
+                inParams::MowerAppSetMode { modeOfOperation } => vec![modeOfOperation as u8],
+                inParams::SystemSettingsSetLoopDetection { loopDetection } => vec![loopDetection],
+                inParams::HeightMotorSetHeight { height } => vec![height],
+                inParams::CollisionSetSimulation { onOff } => vec![onOff as u8],
+                inParams::CollisionSetSimulatedStatus { status } => Vec::from(status.to_le_bytes()),
+                inParams::SoundSetSoundType { soundType } => vec![soundType as u8],
                 _ => Vec::new(),
             }
         }
@@ -191,6 +199,8 @@ pub mod proto {
             return Err("crc does not match");
         }
 
-        Ok(outParams::SoundSetSoundType(tSoundType::SoundKeyClick))
+        Ok(outParams::SoundSetSoundType {
+            soundType: tSoundType::SoundKeyClick,
+        })
     }
 }

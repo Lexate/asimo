@@ -10,10 +10,10 @@ fn motor(left: f32, right: f32) -> inParams {
     let left = f32::clamp(left, -1.0, 1.0);
     let right = f32::clamp(right, -1.0, 1.0);
 
-    types::inParams::HardwareControlWheelMotorsPower(
-        (left * 100.0).round() as i16,
-        (right * 100.0).round() as i16,
-    )
+    types::inParams::HardwareControlWheelMotorsPower {
+        leftWheelMotorPower: (left * 100.0).round() as i16,
+        rightWheelMotorPower: (right * 100.0).round() as i16,
+    }
 }
 
 fn arcade_drive(rot: f32, fwd: f32, square: bool) -> (f32, f32) {
@@ -59,29 +59,29 @@ fn main() {
     let mut active_gamepad = None;
 
     let resp = serial
-        .send_message(types::inParams::DeviceInformationGetDeviceIdentification())
+        .send_message(types::inParams::DeviceInformationGetDeviceIdentification {})
         .unwrap();
     println!("{:02X?}", resp);
 
     serial
-        .send_message(types::inParams::SystemSettingsSetLoopDetection(0))
+        .send_message(types::inParams::SystemSettingsSetLoopDetection { loopDetection: 0 })
         .unwrap();
 
     let resp = serial
-        .send_message(types::inParams::SystemSettingsGetLoopDetection())
+        .send_message(types::inParams::SystemSettingsGetLoopDetection {})
         .unwrap();
     println!("{:02X?}", resp);
 
     loop {
         let state = serial
-            .send_message(types::inParams::MowerAppGetState())
+            .send_message(types::inParams::MowerAppGetState {})
             .expect("could not get state");
 
         println!("State : {:02X?}", state);
 
         if state.get(9).expect("State smaller than 11") == &6 {
             serial
-                .send_message(types::inParams::MowerAppPause())
+                .send_message(types::inParams::MowerAppPause {})
                 .expect("could not pause");
             println!("*******************************************");
             break;
@@ -91,9 +91,9 @@ fn main() {
 
     // Confirmation beep
     serial
-        .send_message(types::inParams::SoundSetSoundType(
-            types::tSoundType::SoundDoubleBeep,
-        ))
+        .send_message(types::inParams::SoundSetSoundType {
+            soundType: types::tSoundType::SoundDoubleBeep,
+        })
         .unwrap();
 
     let mut fwd = 0.0;
@@ -136,16 +136,16 @@ fn main() {
         }
 
         let resp = serial.send_message(motor(left, right)).unwrap();
-        println!("{:?}", resp);
+        println!("{:02X?}", resp);
 
         let resp = serial
-            .send_message(types::inParams::RealTimeDataGetWheelMotorData())
+            .send_message(types::inParams::RealTimeDataGetWheelMotorData {})
             .unwrap();
-        println!("{:?}", resp);
+        println!("{:02X?}", resp);
 
         sleep(Duration::from_millis(20));
     }
 
     let resp = serial.send_message(motor(0.0, 0.0)).unwrap();
-    println!("{:?}", resp);
+    println!("{:02X?}", resp);
 }

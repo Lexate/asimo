@@ -1,4 +1,5 @@
 #![allow(non_camel_case_types)] // I should proably change the python code
+#![allow(non_snake_case)]
 #![allow(unused)] // for now
 pub mod types {
     #[derive(Clone, Copy)]
@@ -120,172 +121,276 @@ pub mod types {
     }
     #[derive(Clone, Copy)]
     pub enum inParams {
-        DeviceInformationGetDeviceIdentification(),         /*  */
-        RealTimeDataGetWheelMotorData(),                    /*  */
-        SystemSettingsSetHeadlightEnabled(u8),              /* headlight,  */
-        WheelsGetSpeed(u8),                                 /* index,  */
-        WheelsGetRotationCounter(u8),                       /* index,  */
-        CollisionGetStatus(),                               /*  */
-        ChargerIsChargingEnabled(),                         /*  */
-        LiftSensorIsActivated(),                            /*  */
-        RealTimeDataGetBatteryData(),                       /*  */
-        CurrentStatusGetStatusKeepAlive(),                  /*  */
-        LoopSamplerGetLoopSignalMaster(tILoopSamplerLoops), /* loop,  */
-        StopButtonIsActivated(),                            /*  */
-        WheelsPowerOff(),                                   /*  */
-        WheelsPowerOn(),                                    /*  */
-        HardwareControlWheelMotorsPower(i16, i16), /* leftWheelMotorPower, rightWheelMotorPower,  */
-        MowerAppSetMode(tIMowerApp_MowerMode),     /* modeOfOperation,  */
-        SystemSettingsGetLoopDetection(),          /*  */
-        MowerAppGetMode(),                         /*  */
-        MowerAppGetState(),                        /*  */
-        BladeMotorBrake(),                         /*  */
-        BladeMotorRun(),                           /*  */
-        BladeMotorOn(),                            /*  */
-        BladeMotorOff(),                           /*  */
-        MowerAppStartTrigger(),                    /*  */
-        MowerAppPause(),                           /*  */
-        SystemSettingsSetLoopDetection(u8),        /* loopDetection,  */
-        HeightMotorSetHeight(u8),                  /* height,  */
-        RealTimeDataGetGPSData(),                  /*  */
-        CollisionSetSimulation(bool),              /* onOff,  */
-        CollisionGetSimulation(),                  /*  */
-        CollisionSetSimulatedStatus(u32),          /* status,  */
-        CollisionGetSimulatedStatus(),             /*  */
-        SoundSetSoundType(tSoundType),             /* soundType,  */
-        SoundGetSoundType(),                       /*  */
-        RealTimeDataGetComboardSensorData(),       /*  */
-        RealTimeDataGetSensorData(),               /*  */
-        SafetySupervisorGetStatus(),               /*  */
-        ChargerIsChargingPowerConnected(),         /*  */
-        PlannerClearOverride(),                    /*  */
+        DeviceInformationGetDeviceIdentification {},
+        RealTimeDataGetWheelMotorData {},
+        SystemSettingsSetHeadlightEnabled {
+            headlight: u8,
+        },
+        WheelsGetSpeed {
+            index: u8,
+        },
+        WheelsGetRotationCounter {
+            index: u8,
+        },
+        CollisionGetStatus {},
+        ChargerIsChargingEnabled {},
+        LiftSensorIsActivated {},
+        RealTimeDataGetBatteryData {},
+        CurrentStatusGetStatusKeepAlive {},
+        LoopSamplerGetLoopSignalMaster {
+            selectedloop: tILoopSamplerLoops,
+        },
+        StopButtonIsActivated {},
+        WheelsPowerOff {},
+        WheelsPowerOn {},
+        HardwareControlWheelMotorsPower {
+            leftWheelMotorPower: i16,
+            rightWheelMotorPower: i16,
+        },
+        MowerAppSetMode {
+            modeOfOperation: tIMowerApp_MowerMode,
+        },
+        SystemSettingsGetLoopDetection {},
+        MowerAppGetMode {},
+        MowerAppGetState {},
+        BladeMotorBrake {},
+        BladeMotorRun {},
+        BladeMotorOn {},
+        BladeMotorOff {},
+        MowerAppStartTrigger {},
+        MowerAppPause {},
+        SystemSettingsSetLoopDetection {
+            loopDetection: u8,
+        },
+        HeightMotorSetHeight {
+            height: u8,
+        },
+        RealTimeDataGetGPSData {},
+        CollisionSetSimulation {
+            onOff: bool,
+        },
+        CollisionGetSimulation {},
+        CollisionSetSimulatedStatus {
+            status: u32,
+        },
+        CollisionGetSimulatedStatus {},
+        SoundSetSoundType {
+            soundType: tSoundType,
+        },
+        SoundGetSoundType {},
+        RealTimeDataGetComboardSensorData {},
+        RealTimeDataGetSensorData {},
+        SafetySupervisorGetStatus {},
+        ChargerIsChargingPowerConnected {},
+        PlannerClearOverride {},
     }
     #[derive(Clone, Copy)]
     pub enum outParams {
-        DeviceInformationGetDeviceIdentification(
-            tDeviceTypeGroup,
-            tMowerDeviceType,
-            u32,
-            tMowerVariantType,
-        ), /* deviceTypeGroup, mowerDeviceType, mowerSerialNo, mowerVariantType,  */
-        RealTimeDataGetWheelMotorData(i16, i16, i16, i16, i16, i16, i16), /* powerleft, speedleft, currentleft, powerright, speedright, currentright, difference,  */
-        SystemSettingsSetHeadlightEnabled(u8),                            /* headlight,  */
-        WheelsGetSpeed(i16),                                              /* speed,  */
-        WheelsGetRotationCounter(i32),                                    /* counter,  */
-        CollisionGetStatus(bool, bool, bool), /* collisionFrontCenter, collisionRearRight, collisionRearLeft,  */
-        ChargerIsChargingEnabled(bool),       /* isChargingEnabled,  */
-        LiftSensorIsActivated(bool),          /* isActivated,  */
-        RealTimeDataGetBatteryData(u16, i16, i16, i16, i16, u16, i16, i16, i16, i16), /* batavoltage, bataenergylevel, batacurrent, batatemp, batacapacity, batbvoltage, batbenergylevel, batbcurrent, batbtemp, batbcapacity,  */
-        CurrentStatusGetStatusKeepAlive(u8, u8, u8, u8, u16), /* mainState, subState, mode, timerStatusAndOpMode, hostMessage,  */
-        LoopSamplerGetLoopSignalMaster(i16),                  /* signalLevel,  */
-        StopButtonIsActivated(bool),                          /* isActivated,  */
-        WheelsPowerOff(),                                     /*  */
-        WheelsPowerOn(),                                      /*  */
-        HardwareControlWheelMotorsPower(),                    /*  */
-        MowerAppSetMode(),                                    /*  */
-        SystemSettingsGetLoopDetection(u8),                   /* loopDetection,  */
-        MowerAppGetMode(tIMowerApp_MowerMode),                /* modeOfOperation,  */
-        MowerAppGetState(tIMowerApp_State),                   /* mowerState,  */
-        BladeMotorBrake(),                                    /*  */
-        BladeMotorRun(),                                      /*  */
-        BladeMotorOn(),                                       /*  */
-        BladeMotorOff(),                                      /*  */
-        MowerAppStartTrigger(),                               /*  */
-        MowerAppPause(),                                      /*  */
-        SystemSettingsSetLoopDetection(u8),                   /* loopDetection,  */
-        HeightMotorSetHeight(tReturn),                        /* retVal,  */
-        RealTimeDataGetGPSData(
-            u8,
-            u8,
-            u16,
-            u8,
-            u8,
-            u32,
-            u32,
-            u32,
-            u32,
-            u16,
-            u16,
-            u8,
-            u8,
-            u8,
-            u8,
-        ), /* quality, noofsatellites, hdop, northsouth, eastwest, latitudedegreeminute, latitudedecimalminute, longitudedegreeminute, longitudedecimalminute, xpos, ypos, gpstype, gpscoverage, gpsnavigationstatus, gpsstatus,  */
-        CollisionSetSimulation(bool),     /* onOff,  */
-        CollisionGetSimulation(bool),     /* onOff,  */
-        CollisionSetSimulatedStatus(u32), /* status,  */
-        CollisionGetSimulatedStatus(u32), /* status,  */
-        SoundSetSoundType(tSoundType),    /* soundType,  */
-        SoundGetSoundType(tSoundType),    /* soundType,  */
-        RealTimeDataGetComboardSensorData(i16, i16, i16, u8, i16), /* pitch, roll, zacceleration, upsidedown, mowertemp,  */
-        RealTimeDataGetSensorData(u8, u8, i16, i16, i16, u8, i16), /* collision, lift, pitch, roll, zacceleration, upsidedown, mowertemp,  */
-        SafetySupervisorGetStatus(
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-            bool,
-        ), /* stopButtonPressed, onOffSwitchInactive, lifted, upsideDown, tooMuchTilt, collision3s, tooFarOutsideBoundary, noLoopSignalWheels, pinCodeNeeded, twoSeperateActionsNeededBlade, twoSeperateActionsNeededWheels, warningSoundNeeded, chargingOngoing, noLoopSignalBlade, collisionIsActive, memNotValidated, blade10sLift, blade10sTilt, blade10sCollision, bladeUpSideDown, powerModeLedBroken,  */
-        ChargerIsChargingPowerConnected(bool), /* isChargingPowerConnected,  */
-        PlannerClearOverride(),                /*  */
+        DeviceInformationGetDeviceIdentification {
+            deviceTypeGroup: tDeviceTypeGroup,
+            mowerDeviceType: tMowerDeviceType,
+            mowerSerialNo: u32,
+            mowerVariantType: tMowerVariantType,
+        },
+        RealTimeDataGetWheelMotorData {
+            powerleft: i16,
+            speedleft: i16,
+            currentleft: i16,
+            powerright: i16,
+            speedright: i16,
+            currentright: i16,
+            difference: i16,
+        },
+        SystemSettingsSetHeadlightEnabled {
+            headlight: u8,
+        },
+        WheelsGetSpeed {
+            speed: i16,
+        },
+        WheelsGetRotationCounter {
+            counter: i32,
+        },
+        CollisionGetStatus {
+            collisionFrontCenter: bool,
+            collisionRearRight: bool,
+            collisionRearLeft: bool,
+        },
+        ChargerIsChargingEnabled {
+            isChargingEnabled: bool,
+        },
+        LiftSensorIsActivated {
+            isActivated: bool,
+        },
+        RealTimeDataGetBatteryData {
+            batavoltage: u16,
+            bataenergylevel: i16,
+            batacurrent: i16,
+            batatemp: i16,
+            batacapacity: i16,
+            batbvoltage: u16,
+            batbenergylevel: i16,
+            batbcurrent: i16,
+            batbtemp: i16,
+            batbcapacity: i16,
+        },
+        CurrentStatusGetStatusKeepAlive {
+            mainState: u8,
+            subState: u8,
+            mode: u8,
+            timerStatusAndOpMode: u8,
+            hostMessage: u16,
+        },
+        LoopSamplerGetLoopSignalMaster {
+            signalLevel: i16,
+        },
+        StopButtonIsActivated {
+            isActivated: bool,
+        },
+        WheelsPowerOff {},
+        WheelsPowerOn {},
+        HardwareControlWheelMotorsPower {},
+        MowerAppSetMode {},
+        SystemSettingsGetLoopDetection {
+            loopDetection: u8,
+        },
+        MowerAppGetMode {
+            modeOfOperation: tIMowerApp_MowerMode,
+        },
+        MowerAppGetState {
+            mowerState: tIMowerApp_State,
+        },
+        BladeMotorBrake {},
+        BladeMotorRun {},
+        BladeMotorOn {},
+        BladeMotorOff {},
+        MowerAppStartTrigger {},
+        MowerAppPause {},
+        SystemSettingsSetLoopDetection {
+            loopDetection: u8,
+        },
+        HeightMotorSetHeight {
+            retVal: tReturn,
+        },
+        RealTimeDataGetGPSData {
+            quality: u8,
+            noofsatellites: u8,
+            hdop: u16,
+            northsouth: u8,
+            eastwest: u8,
+            latitudedegreeminute: u32,
+            latitudedecimalminute: u32,
+            longitudedegreeminute: u32,
+            longitudedecimalminute: u32,
+            xpos: u16,
+            ypos: u16,
+            gpstype: u8,
+            gpscoverage: u8,
+            gpsnavigationstatus: u8,
+            gpsstatus: u8,
+        },
+        CollisionSetSimulation {
+            onOff: bool,
+        },
+        CollisionGetSimulation {
+            onOff: bool,
+        },
+        CollisionSetSimulatedStatus {
+            status: u32,
+        },
+        CollisionGetSimulatedStatus {
+            status: u32,
+        },
+        SoundSetSoundType {
+            soundType: tSoundType,
+        },
+        SoundGetSoundType {
+            soundType: tSoundType,
+        },
+        RealTimeDataGetComboardSensorData {
+            pitch: i16,
+            roll: i16,
+            zacceleration: i16,
+            upsidedown: u8,
+            mowertemp: i16,
+        },
+        RealTimeDataGetSensorData {
+            collision: u8,
+            lift: u8,
+            pitch: i16,
+            roll: i16,
+            zacceleration: i16,
+            upsidedown: u8,
+            mowertemp: i16,
+        },
+        SafetySupervisorGetStatus {
+            stopButtonPressed: bool,
+            onOffSwitchInactive: bool,
+            lifted: bool,
+            upsideDown: bool,
+            tooMuchTilt: bool,
+            collision3s: bool,
+            tooFarOutsideBoundary: bool,
+            noLoopSignalWheels: bool,
+            pinCodeNeeded: bool,
+            twoSeperateActionsNeededBlade: bool,
+            twoSeperateActionsNeededWheels: bool,
+            warningSoundNeeded: bool,
+            chargingOngoing: bool,
+            noLoopSignalBlade: bool,
+            collisionIsActive: bool,
+            memNotValidated: bool,
+            blade10sLift: bool,
+            blade10sTilt: bool,
+            blade10sCollision: bool,
+            bladeUpSideDown: bool,
+            powerModeLedBroken: bool,
+        },
+        ChargerIsChargingPowerConnected {
+            isChargingPowerConnected: bool,
+        },
+        PlannerClearOverride {},
     }
     pub fn get_msgtype(param: inParams) -> (u16, u8) {
-        match params {
-            inParams::DeviceInformationGetDeviceIdentification() => (22, 0),
-            inParams::RealTimeDataGetWheelMotorData() => (20, 2),
-            inParams::SystemSettingsSetHeadlightEnabled(..) => (2, 0x94),
-            inParams::WheelsGetSpeed(..) => (4336, 6),
-            inParams::WheelsGetRotationCounter(..) => (4336, 5),
-            inParams::CollisionGetStatus() => (4166, 2),
-            inParams::ChargerIsChargingEnabled() => (4486, 3),
-            inParams::LiftSensorIsActivated() => (4476, 0),
-            inParams::RealTimeDataGetBatteryData() => (20, 1),
-            inParams::CurrentStatusGetStatusKeepAlive() => (18, 0x80),
-            inParams::LoopSamplerGetLoopSignalMaster(..) => (4480, 3),
-            inParams::StopButtonIsActivated() => (4464, 4),
-            inParams::WheelsPowerOff() => (4336, 8),
-            inParams::WheelsPowerOn() => (4336, 9),
-            inParams::HardwareControlWheelMotorsPower(..) => (16, 2),
-            inParams::MowerAppSetMode(..) => (4586, 0),
-            inParams::SystemSettingsGetLoopDetection() => (2, 0x08),
-            inParams::MowerAppGetMode() => (4586, 1),
-            inParams::MowerAppGetState() => (4586, 2),
-            inParams::BladeMotorBrake() => (4362, 0),
-            inParams::BladeMotorRun() => (4362, 1),
-            inParams::BladeMotorOn() => (4362, 9),
-            inParams::BladeMotorOff() => (4362, 10),
-            inParams::MowerAppStartTrigger() => (4586, 4),
-            inParams::MowerAppPause() => (4586, 5),
-            inParams::SystemSettingsSetLoopDetection(..) => (2, 0x88),
-            inParams::HeightMotorSetHeight(..) => (4488, 8),
-            inParams::RealTimeDataGetGPSData() => (20, 7),
-            inParams::CollisionSetSimulation(..) => (4166, 5),
-            inParams::CollisionGetSimulation() => (4166, 6),
-            inParams::CollisionSetSimulatedStatus(..) => (4166, 7),
-            inParams::CollisionGetSimulatedStatus() => (4166, 8),
-            inParams::SoundSetSoundType(..) => (4268, 0),
-            inParams::SoundGetSoundType() => (4268, 1),
-            inParams::RealTimeDataGetComboardSensorData() => (20, 140),
-            inParams::RealTimeDataGetSensorData() => (20, 4),
-            inParams::SafetySupervisorGetStatus() => (4466, 0),
-            inParams::ChargerIsChargingPowerConnected() => (4486, 4),
-            inParams::PlannerClearOverride() => (4658, 6),
+        match param {
+            inParams::DeviceInformationGetDeviceIdentification {} => (22, 0),
+            inParams::RealTimeDataGetWheelMotorData {} => (20, 2),
+            inParams::SystemSettingsSetHeadlightEnabled { .. } => (2, 0x94),
+            inParams::WheelsGetSpeed { .. } => (4336, 6),
+            inParams::WheelsGetRotationCounter { .. } => (4336, 5),
+            inParams::CollisionGetStatus {} => (4166, 2),
+            inParams::ChargerIsChargingEnabled {} => (4486, 3),
+            inParams::LiftSensorIsActivated {} => (4476, 0),
+            inParams::RealTimeDataGetBatteryData {} => (20, 1),
+            inParams::CurrentStatusGetStatusKeepAlive {} => (18, 0x80),
+            inParams::LoopSamplerGetLoopSignalMaster { .. } => (4480, 3),
+            inParams::StopButtonIsActivated {} => (4464, 4),
+            inParams::WheelsPowerOff {} => (4336, 8),
+            inParams::WheelsPowerOn {} => (4336, 9),
+            inParams::HardwareControlWheelMotorsPower { .. } => (16, 2),
+            inParams::MowerAppSetMode { .. } => (4586, 0),
+            inParams::SystemSettingsGetLoopDetection {} => (2, 0x08),
+            inParams::MowerAppGetMode {} => (4586, 1),
+            inParams::MowerAppGetState {} => (4586, 2),
+            inParams::BladeMotorBrake {} => (4362, 0),
+            inParams::BladeMotorRun {} => (4362, 1),
+            inParams::BladeMotorOn {} => (4362, 9),
+            inParams::BladeMotorOff {} => (4362, 10),
+            inParams::MowerAppStartTrigger {} => (4586, 4),
+            inParams::MowerAppPause {} => (4586, 5),
+            inParams::SystemSettingsSetLoopDetection { .. } => (2, 0x88),
+            inParams::HeightMotorSetHeight { .. } => (4488, 8),
+            inParams::RealTimeDataGetGPSData {} => (20, 7),
+            inParams::CollisionSetSimulation { .. } => (4166, 5),
+            inParams::CollisionGetSimulation {} => (4166, 6),
+            inParams::CollisionSetSimulatedStatus { .. } => (4166, 7),
+            inParams::CollisionGetSimulatedStatus {} => (4166, 8),
+            inParams::SoundSetSoundType { .. } => (4268, 0),
+            inParams::SoundGetSoundType {} => (4268, 1),
+            inParams::RealTimeDataGetComboardSensorData {} => (20, 140),
+            inParams::RealTimeDataGetSensorData {} => (20, 4),
+            inParams::SafetySupervisorGetStatus {} => (4466, 0),
+            inParams::ChargerIsChargingPowerConnected {} => (4486, 4),
+            inParams::PlannerClearOverride {} => (4658, 6),
         }
     }
 }
