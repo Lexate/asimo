@@ -41,7 +41,7 @@ fn arcade_drive(rot: f32, fwd: f32, square: bool) -> (f32, f32) {
     }
 }
 
-fn main() {
+fn motor_test() {
     let mut serial = comms::Serial::new("/dev/ttyUSB0", 115200, Duration::from_millis(1))
         .expect("Could not establish comms");
 
@@ -149,3 +149,5 @@ fn main() {
     let resp = serial.send_message(motor(0.0, 0.0)).unwrap();
     println!("{:02X?}", resp);
 }
+
+fn main() {}
