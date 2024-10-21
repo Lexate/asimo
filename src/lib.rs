@@ -1,6 +1,11 @@
 mod gen_types;
 pub use crate::gen_types::types;
 
+mod error;
+pub use error::{Error, Result};
+mod ser;
+pub use ser::{to_bytes, Serializer};
+
 pub mod comms {
     use crate::proto;
     use serialport::SerialPort;
