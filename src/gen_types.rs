@@ -2,7 +2,8 @@
 #![allow(non_snake_case)]
 #![allow(unused)] // for now
 pub mod types {
-    #[derive(Clone, Copy)]
+    use serde::{Deserialize, Serialize};
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tILoopSamplerLoops {
         LoopsamplerLoopA = 0,         /* A */
         LoopsamplerLoopF = 1,         /* F */
@@ -12,14 +13,14 @@ pub mod types {
         LoopsamplerLoopG3 = 5,        /* Guide 3 */
         LoopsamplerNumberOfLoops = 6, /*  */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tIMowerApp_MowerMode {
         ImowerappModeAuto = 0,   /* Auto */
         ImowerappModeManual = 1, /* Manual */
         ImowerappModeHome = 2,   /* Home */
         ImowerappModeDemo = 3,   /* Demo */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tIMowerApp_State {
         ImowerappStateOff = 0,              /* Off */
         ImowerappStateWaitForSafetypin = 1, /* Wait for safety pin */
@@ -31,7 +32,7 @@ pub mod types {
         ImowerappStateRestricted = 7,       /* Restricted */
         ImowerappStateError = 8,            /* Error */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tReturn {
         Ok = 0,            /* OK */
         EUndefined = 1,    /* Undefined error */
@@ -45,7 +46,7 @@ pub mod types {
         IBusy = 129,       /* Info: Busy. No action needed */
         IQueued = 130,     /* Info: The call put in queue */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tDeviceTypeGroup {
         DeviceTypeGroupUndefined = 0,     /*  */
         DeviceTypeGroupGpsBoard = 1,      /*  */
@@ -69,7 +70,7 @@ pub mod types {
         DeviceTypeGroupSwUltrasonic = 35, /*  */
         DeviceTypeGroupSwCom = 36,        /*  */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tMowerDeviceType {
         MowerDeviceTypeUndefined = 0, /*  */
         MowerDeviceTypeB = 1,         /*  */
@@ -90,7 +91,7 @@ pub mod types {
         MowerDeviceTypeQ = 16,        /*  */
         MowerDeviceTypeNoMore = 17,   /*  */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tMowerVariantType {
         MowerVariantTypeUndefined = 255, /*  */
         MowerVariantTypeOrg = 0,         /*  */
@@ -101,7 +102,7 @@ pub mod types {
         MowerVariantTypeF = 5,           /*  */
         MowerVariantTypeNoMore = 6,      /*  */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum tSoundType {
         SoundKeyClick = 0,             /* Key Click */
         SoundClick = 1,                /* Click Sound */
@@ -119,7 +120,7 @@ pub mod types {
         SoundTone1 = 13,               /* Tone 1 minute */
         SoundOff = 14,                 /* Sound Off */
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum inParams {
         DeviceInformationGetDeviceIdentification {},
         RealTimeDataGetWheelMotorData {},
@@ -184,7 +185,7 @@ pub mod types {
         ChargerIsChargingPowerConnected {},
         PlannerClearOverride {},
     }
-    #[derive(Clone, Copy)]
+    #[derive(Clone, Copy, Serialize, Deserialize)]
     pub enum outParams {
         DeviceInformationGetDeviceIdentification {
             deviceTypeGroup: tDeviceTypeGroup,

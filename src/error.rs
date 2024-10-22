@@ -18,8 +18,7 @@ pub enum Error {
     // field is missing.
     Message(String),
 
-    UnsupportedType,
-
+    UnsupportedType(String),
     // Zero or more variants that can be created directly by the Serializer and
     // Deserializer without going through `ser::Error` and `de::Error`. These
     // are specific to the format, in this case JSON.
@@ -56,8 +55,11 @@ impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::Message(msg) => formatter.write_str(msg),
-            // Error::Eof => formatter.write_str("unexpected end of input"),
-            /* and so forth */
+            Error::UnsupportedType(typ) => formatter.write_str(&format!(
+                "Type: {} not suported by this serde implementation",
+                typ
+            )), // Error::Eof => formatter.write_str("unexpected end of input"),
+                /* and so forth */
         }
     }
 }

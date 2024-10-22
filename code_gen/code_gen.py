@@ -3,7 +3,7 @@ import json
 def types_to_enums(types):
     code = ""
     for type in types:
-        code += "#[derive(Clone, Copy)]\n"
+        code += "#[derive(Clone, Copy, Serialize, Deserialize)]\n"
         code += "pub enum " + type["name"] + " {"
         for e in type["enums"]:
             parts = ""
@@ -60,7 +60,7 @@ def extract_names(params):
 
 
 def methods_to_structs(methods, params):
-    code = "#[derive(Clone, Copy)]\n"
+    code = "#[derive(Clone, Copy, Serialize, Deserialize)]\n"
     code += " pub enum " + params + " { \n"
     for m in methods:
         code += m["family"] + m["command"] + "{" + extract_types(m[params]) + "},"
@@ -89,6 +89,7 @@ if __name__ == "__main__":
     #![allow(non_snake_case)]
     #![allow(unused)] // for now
     pub mod types {
+    use serde::{Serialize,Deserialize};
     """
     ###### Enums ######
     types = json_data["types"]

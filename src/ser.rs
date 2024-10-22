@@ -11,9 +11,7 @@ pub fn to_bytes<T>(value: &T) -> Result<Vec<u8>>
 where
     T: Serialize,
 {
-    let mut serializer = Serializer {
-        output: Vec::new(),
-    };
+    let mut serializer = Serializer { output: Vec::new() };
     value.serialize(&mut serializer)?;
     Ok(serializer.output)
 }
@@ -93,11 +91,11 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_char(self, _v: char) -> Result<()> {
-        Err(Error::UnsupportedType)
+        Err(Error::UnsupportedType("char".to_string()))
     }
 
     fn serialize_str(self, _v: &str) -> Result<()> {
-        Err(Error::UnsupportedType)
+        Err(Error::UnsupportedType("str".to_string()))
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
@@ -106,99 +104,227 @@ impl<'a> ser::Serializer for &'a mut Serializer {
     }
 
     fn serialize_none(self) -> Result<()> {
-        Err(Error::UnsupportedType)
+        Err(Error::UnsupportedType("none".to_string()))
     }
 
     fn serialize_some<T>(self, _value: &T) -> Result<()>
     where
-        T: ?Sized + Serialize {
-        Err(Error::UnsupportedType)
+        T: ?Sized + Serialize,
+    {
+        Err(Error::UnsupportedType("some".to_string()))
     }
 
     fn serialize_unit(self) -> Result<()> {
-        todo!()
+        self.output.push(0x00); // Return a zero byte on unit, this might need to be changed further on
+        Ok(())
     }
 
-    fn serialize_unit_struct(self, name: &'static str) -> Result<()> {
-        todo!()
+    fn serialize_unit_struct(self, _name: &'static str) -> Result<()> {
+        self.serialize_unit()
     }
 
     fn serialize_unit_variant(
         self,
-        name: &'static str,
-        variant_index: u32,
-        variant: &'static str,
+        _name: &'static str,
+        _variant_index: u32,
+        _variant: &'static str,
     ) -> Result<()> {
-        todo!()
+        self.serialize_unit()
     }
 
-    fn serialize_newtype_struct<T>(
-        self,
-        name: &'static str,
-        value: &T,
-    ) -> Result<()>
+    fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<()>
     where
-        T: ?Sized + Serialize {
-        todo!()
+        T: ?Sized + Serialize,
+    {
+        value.serialize(self)
     }
 
     fn serialize_newtype_variant<T>(
         self,
-        name: &'static str,
-        variant_index: u32,
-        variant: &'static str,
+        _name: &'static str,
+        _variant_index: u32,
+        _variant: &'static str,
         value: &T,
     ) -> Result<()>
     where
-        T: ?Sized + Serialize {
-        todo!()
+        T: ?Sized + Serialize,
+    {
+        value.serialize(self)
     }
 
-    fn serialize_seq(self, len: Option<usize>) -> std::result::Result<Self::SerializeSeq, Self::Error> {
-        todo!()
+    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
+        Err(Error::UnsupportedType("seq".to_string()))
     }
 
-    fn serialize_tuple(self, len: usize) -> std::result::Result<Self::SerializeTuple, Self::Error> {
-        todo!()
+    fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
+        Ok(self) // I am a bit unsure of how this works but i hope it does
     }
 
     fn serialize_tuple_struct(
         self,
-        name: &'static str,
-        len: usize,
-    ) -> std::result::Result<Self::SerializeTupleStruct, Self::Error> {
-        todo!()
+        _name: &'static str,
+        _len: usize,
+    ) -> Result<Self::SerializeTupleStruct> {
+        Ok(self)
     }
 
     fn serialize_tuple_variant(
         self,
-        name: &'static str,
-        variant_index: u32,
-        variant: &'static str,
-        len: usize,
+        _name: &'static str,
+        _variant_index: u32,
+        _variant: &'static str,
+        _len: usize,
     ) -> std::result::Result<Self::SerializeTupleVariant, Self::Error> {
-        todo!()
+        Ok(self)
     }
 
-    fn serialize_map(self, len: Option<usize>) -> std::result::Result<Self::SerializeMap, Self::Error> {
-        todo!()
+    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
+        Err(Error::UnsupportedType("map".to_string()))
     }
 
-    fn serialize_struct(
-        self,
-        name: &'static str,
-        len: usize,
-    ) -> std::result::Result<Self::SerializeStruct, Self::Error> {
-        todo!()
+    fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
+        Ok(self)
     }
 
     fn serialize_struct_variant(
         self,
-        name: &'static str,
-        variant_index: u32,
-        variant: &'static str,
-        len: usize,
-    ) -> std::result::Result<Self::SerializeStructVariant, Self::Error> {
-        todo!()
+        _name: &'static str,
+        _variant_index: u32,
+        _variant: &'static str,
+        _len: usize,
+    ) -> Result<Self::SerializeStructVariant> {
+        Ok(self)
+    }
+}
+
+impl<'a> ser::SerializeSeq for &'a mut Serializer {
+    // Must match the `Ok` type of the serializer.
+    type Ok = ();
+    // Must match the `Error` type of the serializer.
+    type Error = Error;
+
+    // Serialize a single element of the sequence.
+    fn serialize_element<T>(&mut self, _value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        unreachable!();
+    }
+
+    // Close the sequence.
+    fn end(self) -> Result<()> {
+        unreachable!()
+    }
+}
+
+// Same thing but for tuples.
+impl<'a> ser::SerializeTuple for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_element<T>(&mut self, value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+// Same thing but for tuple structs.
+impl<'a> ser::SerializeTupleStruct for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_field<T>(&mut self, value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeTupleVariant for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_field<T>(&mut self, value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+// Structs are like maps in which the keys are constrained to be compile-time
+// constant strings.
+impl<'a> ser::SerializeStruct for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_field<T>(&mut self, _key: &'static str, value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+// Similar to `SerializeTupleVariant`, here the `end` method is responsible for
+// closing both of the curly braces opened by `serialize_struct_variant`.
+impl<'a> ser::SerializeStructVariant for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_field<T>(&mut self, _key: &'static str, value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        value.serialize(&mut **self)
+    }
+
+    fn end(self) -> Result<()> {
+        Ok(())
+    }
+}
+
+impl<'a> ser::SerializeMap for &'a mut Serializer {
+    type Ok = ();
+    type Error = Error;
+
+    fn serialize_key<T>(&mut self, _key: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        unreachable!()
+    }
+
+    // It doesn't make a difference whether the colon is printed at the end of
+    // `serialize_key` or at the beginning of `serialize_value`. In this case
+    // the code is a bit simpler having it here.
+    fn serialize_value<T>(&mut self, _value: &T) -> Result<()>
+    where
+        T: ?Sized + Serialize,
+    {
+        unreachable!()
+    }
+
+    fn end(self) -> Result<()> {
+        unreachable!()
     }
 }

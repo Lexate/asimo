@@ -150,4 +150,7 @@ fn motor_test() {
     println!("{:02X?}", resp);
 }
 
-fn main() {}
+fn main() {
+    //println!("{:02X?}", asimo::to_bytes(&inParams::SoundSetSoundType { soundType: types::tSoundType::SoundDoubleBeep }));
+    println!("{:02X?}", asimo::to_bytes(&inParams::RealTimeDataGetGPSData {  }));
+}
