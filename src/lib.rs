@@ -5,6 +5,8 @@ mod error;
 pub use error::{Error, Result};
 mod ser;
 pub use ser::{to_bytes, Serializer};
+mod de;
+pub use de::{Deserializer};
 
 pub mod comms {
     use crate::proto;
