@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 def convert_type_name(name: str) -> str:
     typ = ""    
@@ -32,6 +33,21 @@ def gen_types(types: dict) -> str:
         for variant in type["enums"]:
             contents.append(f"{variant["key"]}, //{variant["description"]}\n")
         contents.append("}\n")
+
+        contents.append(f"impl Hcp_type for {name} {"{"} \n")
+        contents.append("fn u8_to_variant(value: u8) -> Self {\n")
+        contents.append("match value {\n")
+        for variant in type["enums"]:
+            contents.append(f"{variant["value"]} => Self::{variant["key"]},")
+        contents.append("_ => Self,")
+        contents.append("}}")
+        
+        contents.append("fn to_u8(value: u8) -> Self {\n")
+        contents.append("match value {\n")
+        for variant in type["enums"]:
+            contents.append(f"{variant["key"]} => {variant["value"]},")
+        contents.append("_ => 0,")
+        contents.append("}}}\n")
     return "".join(contents)
 
 def gen_method_enum(method: dict) -> str:
@@ -56,6 +72,16 @@ def gen_method_enum(method: dict) -> str:
     contents.append("},")
 
     contents.append("\n}")
+
+    contents.append(f"impl Hcp for {method["command"]} {"{\n"}")
+    contents.append("fn get_msgtype_subcmd() -> (u16, u8) {\n")
+    contents.append(f"({method["protocol"][0]["value"]}, {method["protocol"][1]["value"]}) {"}"}\n")
+
+    contents.append("fn get_outparams() -> Self {")
+    contents.append("Self::outParams{}")
+    contents.append("}")
+    
+    contents.append("}")
     return "".join(contents)
 
 def gen_method_enums(methods: dict) -> str:
@@ -82,8 +108,10 @@ def main(data):
     with open("./gen_types.rs", "w") as file:
         file.write("".join(contents))
 
+    subprocess.run(["rustfmt", "./gen_types.rs"])
+
 if __name__ == "__main__":
     with open("./hrp_commands.json") as json_data:
         data = json.loads(json_data.read())
     main(data)
-    test(data)
+    #test(data)
