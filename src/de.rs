@@ -1,10 +1,11 @@
+#![allow(unused)]
 use std::ops::{AddAssign, MulAssign, Neg};
 
-use serde::Deserialize;
 use serde::de::{
-    self, DeserializeSeed, EnumAccess, IntoDeserializer, MapAccess, SeqAccess,
-    VariantAccess, Visitor,
+    self, DeserializeSeed, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, VariantAccess,
+    Visitor,
 };
+use serde::Deserialize;
 
 use crate::error::{Error, Result};
 
@@ -25,115 +26,134 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
 
     fn deserialize_any<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_bool<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_i8<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_i16<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_i32<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_i64<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_u8<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_u16<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_u32<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_u64<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_f32<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_f64<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_char<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_str<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_string<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_bytes<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_byte_buf<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_option<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_unit<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
@@ -143,7 +163,8 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor: V,
     ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
@@ -153,19 +174,26 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor: V,
     ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_seq<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
-    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> std::result::Result<V::Value, Self::Error>
+    fn deserialize_tuple<V>(
+        self,
+        len: usize,
+        visitor: V,
+    ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
@@ -176,13 +204,15 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor: V,
     ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_map<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
@@ -193,7 +223,8 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor: V,
     ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
@@ -204,19 +235,22 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor: V,
     ) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_identifier<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 
     fn deserialize_ignored_any<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
-        V: Visitor<'de> {
+        V: Visitor<'de>,
+    {
         todo!()
     }
 }

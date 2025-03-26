@@ -1,4 +1,3 @@
-use std;
 use std::fmt::{self, Display};
 
 use serde::{de, ser};
@@ -19,6 +18,8 @@ pub enum Error {
     Message(String),
 
     UnsupportedType(String),
+
+    DoesNotCorespondToVariant(String),
     // Zero or more variants that can be created directly by the Serializer and
     // Deserializer without going through `ser::Error` and `de::Error`. These
     // are specific to the format, in this case JSON.
@@ -58,8 +59,10 @@ impl Display for Error {
             Error::UnsupportedType(typ) => formatter.write_str(&format!(
                 "Type: {} not suported by this serde implementation",
                 typ
-            )), // Error::Eof => formatter.write_str("unexpected end of input"),
-                /* and so forth */
+            )),
+            Error::DoesNotCorespondToVariant(msg) => formatter.write_str(msg),
+            // Error::Eof => formatter.write_str("unexpected end of input"),
+            /* and so forth */
         }
     }
 }

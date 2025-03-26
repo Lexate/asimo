@@ -1,6 +1,7 @@
 use serde::{ser, Serialize};
 
 use crate::error::{Error, Result};
+use crate::{proto, Hcp};
 
 pub struct Serializer {
     // This string starts empty and bytes appended as values are serialized.
@@ -9,7 +10,7 @@ pub struct Serializer {
 
 pub fn to_bytes<T>(value: &T) -> Result<Vec<u8>>
 where
-    T: Serialize,
+    T: Serialize + Hcp,
 {
     let mut serializer = Serializer { output: Vec::new() };
     value.serialize(&mut serializer)?;
