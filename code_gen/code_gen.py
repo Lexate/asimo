@@ -63,8 +63,13 @@ def methods_to_structs(methods, params):
     code = "#[derive(Clone, Copy, Serialize, Deserialize)]\n"
     code += " pub enum " + params + " { \n"
     for m in methods:
-        code += m["family"] + m["command"] + "{" + extract_types(m[params]) + "},"
+        name = m["family"] + m["command"]
+        code += name + "{" + extract_types(m[params]) + "},"
         # code += extract_names(m[params])
+        code += (f"impl {name} " "{" "fn new(" )
+        code += extract_types(m[params]) + ")"
+
+        code += "}"
     code += "}"
     return code
 

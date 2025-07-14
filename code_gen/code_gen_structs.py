@@ -29,7 +29,7 @@ def convert_type_name(name: str) -> str:
 def gen_types(types: dict) -> str:
     contents = []
     for (name, type) in types.items():
-        contents.append("#[derive(Clone, Copy, Serialize, Deserialize)]\n")
+        contents.append("#[derive(Clone, Copy)]\n")
         contents.append(f"pub enum {name} {"{\n"}")
         for variant in type["enums"]:
             contents.append(f"{variant["key"]}, //{variant["description"]}\n")
@@ -43,12 +43,87 @@ def gen_types(types: dict) -> str:
         contents.append(f"v => Err(Error::DoesNotCorespondToVariant(format!(\"Value {"{v}"} does not corespond to a variant in {name}\"))),")
         contents.append("}}")
 
-        contents.append("fn to_u8(value: Self) -> u8 {\n")
-        contents.append("match value {\n")
+        contents.append("fn to_u8(&self) -> u8 {\n")
+        contents.append("match *self {\n")
         for variant in type["enums"]:
             contents.append(f"Self::{variant["key"]} => {variant["value"]},")
         contents.append("}}}\n")
+
+        contents.append(f"impl Serialize for {name}" + "{")
+        contents.append("fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer, {")
+        contents.append("serializer.serialize_u8(self.to_u8())")
+        contents.append("}}")
+
+        visitor = f"""
+struct {name}Visitor;
+
+impl<'de> Visitor<'de> for {name}Visitor {"{"}
+    type Value = {name};
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {"{"}
+        formatter.write_str("an unsigned integer coresponding to a enum variant")
+    {"}"}
+
+    fn visit_u8<E>(self, value: u8) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        match self
+    {"}"}
+    fn visit_i8<E>(self, value: i8) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_u16<E>(self, value: u16) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_i16<E>(self, value: i16) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_u32<E>(self, value: u32) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_i32<E>(self, value: i32) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+        
+    {"}"}
+    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {"{"}
+
+    {"}"}
+{"}"}
+        """
+        
     return "".join(contents)
+
+def clean_name(name: str) -> str:
+    out = ""
+    if name == "loop":
+        out = "selectedloop"
+    else:
+        out = name
+    return out
 
 def gen_method_enum(method: dict) -> str:
     contents = []
@@ -60,11 +135,7 @@ def gen_method_enum(method: dict) -> str:
     contents.append("\ninParams")
     contents.append(" {\n")
     for param in method["inParams"]:
-        if param["name"] == "loop":
-            name = "selectedloop"
-        else:
-            name = param["name"]
-        contents.append(f"{name}: {convert_type_name(param["type"])},\n")
+        contents.append(f"{clean_name(param["name"])}: {convert_type_name(param["type"])},\n")
     contents.append("},")
 
     contents.append("\noutParams")
@@ -74,6 +145,14 @@ def gen_method_enum(method: dict) -> str:
     contents.append("},")
 
     contents.append("\n}")
+
+    contents.append(f"impl {method["command"]}" + "{")
+    contents.append("fn new(")
+    contents.append(", ".join([f"{clean_name(a["name"])}: {convert_type_name(a["type"])}" for a in method["inParams"]]) + ")")
+    contents.append(" -> Self {")
+    contents.append(f"Self::inParams({", ".join([clean_name(a["name"]) for a in method["inParams"]])})")
+    contents.append("}")
+    contents.append("}")
 
     contents.append(f"impl Hcp for {method["command"]} {"{\n"}")
     contents.append("fn get_msgtype_subcmd() -> Msgtype {\n")

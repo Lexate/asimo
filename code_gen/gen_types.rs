@@ -429,6 +429,11 @@ pub mod Commands {
                 mowerVariantType: Types::tMowerVariantType,
             },
         }
+        impl GetDeviceIdentification {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetDeviceIdentification {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(22, 0)
@@ -450,6 +455,11 @@ pub mod Commands {
                 difference: i16,
             },
         }
+        impl GetWheelMotorData {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetWheelMotorData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 2)
@@ -470,6 +480,11 @@ pub mod Commands {
                 batbtemp: i16,
                 batbcapacity: i16,
             },
+        }
+        impl GetBatteryData {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for GetBatteryData {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -497,6 +512,11 @@ pub mod Commands {
                 gpsstatus: u8,
             },
         }
+        impl GetGPSData {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetGPSData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 7)
@@ -512,6 +532,11 @@ pub mod Commands {
                 upsidedown: u8,
                 mowertemp: i16,
             },
+        }
+        impl GetComboardSensorData {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for GetComboardSensorData {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -531,6 +556,11 @@ pub mod Commands {
                 mowertemp: i16,
             },
         }
+        impl GetSensorData {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetSensorData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 4)
@@ -544,6 +574,11 @@ pub mod Commands {
             inParams { headlight: u8 },
             outParams { headlight: u8 },
         }
+        impl SetHeadlightEnabled {
+            fn new(headlight: u8) -> Self {
+                Self::inParams(headlight)
+            }
+        }
         impl Hcp for SetHeadlightEnabled {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(2, 0x94)
@@ -554,6 +589,11 @@ pub mod Commands {
             inParams {},
             outParams { loopDetection: u8 },
         }
+        impl GetLoopDetection {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetLoopDetection {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(2, 0x08)
@@ -563,6 +603,11 @@ pub mod Commands {
         pub enum SetLoopDetection {
             inParams { loopDetection: u8 },
             outParams { loopDetection: u8 },
+        }
+        impl SetLoopDetection {
+            fn new(loopDetection: u8) -> Self {
+                Self::inParams(loopDetection)
+            }
         }
         impl Hcp for SetLoopDetection {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -577,6 +622,11 @@ pub mod Commands {
             inParams { index: u8 },
             outParams { speed: i16 },
         }
+        impl GetSpeed {
+            fn new(index: u8) -> Self {
+                Self::inParams(index)
+            }
+        }
         impl Hcp for GetSpeed {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4336, 6)
@@ -586,6 +636,11 @@ pub mod Commands {
         pub enum GetRotationCounter {
             inParams { index: u8 },
             outParams { counter: i32 },
+        }
+        impl GetRotationCounter {
+            fn new(index: u8) -> Self {
+                Self::inParams(index)
+            }
         }
         impl Hcp for GetRotationCounter {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -597,6 +652,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl PowerOff {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for PowerOff {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4336, 8)
@@ -606,6 +666,11 @@ pub mod Commands {
         pub enum PowerOn {
             inParams {},
             outParams {},
+        }
+        impl PowerOn {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for PowerOn {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -624,6 +689,11 @@ pub mod Commands {
                 collisionRearLeft: bool,
             },
         }
+        impl GetStatus {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 2)
@@ -633,6 +703,11 @@ pub mod Commands {
         pub enum SetSimulation {
             inParams { onOff: bool },
             outParams { onOff: bool },
+        }
+        impl SetSimulation {
+            fn new(onOff: bool) -> Self {
+                Self::inParams(onOff)
+            }
         }
         impl Hcp for SetSimulation {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -644,6 +719,11 @@ pub mod Commands {
             inParams {},
             outParams { onOff: bool },
         }
+        impl GetSimulation {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetSimulation {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 6)
@@ -654,6 +734,11 @@ pub mod Commands {
             inParams { status: u32 },
             outParams { status: u32 },
         }
+        impl SetSimulatedStatus {
+            fn new(status: u32) -> Self {
+                Self::inParams(status)
+            }
+        }
         impl Hcp for SetSimulatedStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 7)
@@ -663,6 +748,11 @@ pub mod Commands {
         pub enum GetSimulatedStatus {
             inParams {},
             outParams { status: u32 },
+        }
+        impl GetSimulatedStatus {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for GetSimulatedStatus {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -677,6 +767,11 @@ pub mod Commands {
             inParams {},
             outParams { isChargingEnabled: bool },
         }
+        impl IsChargingEnabled {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for IsChargingEnabled {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4486, 3)
@@ -686,6 +781,11 @@ pub mod Commands {
         pub enum IsChargingPowerConnected {
             inParams {},
             outParams { isChargingPowerConnected: bool },
+        }
+        impl IsChargingPowerConnected {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for IsChargingPowerConnected {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -699,6 +799,11 @@ pub mod Commands {
         pub enum IsActivated {
             inParams {},
             outParams { isActivated: bool },
+        }
+        impl IsActivated {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for IsActivated {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -719,6 +824,11 @@ pub mod Commands {
                 hostMessage: u16,
             },
         }
+        impl GetStatusKeepAlive {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetStatusKeepAlive {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(18, 0x80)
@@ -736,6 +846,11 @@ pub mod Commands {
                 signalLevel: i16,
             },
         }
+        impl GetLoopSignalMaster {
+            fn new(selectedloop: Types::tILoopSamplerLoops) -> Self {
+                Self::inParams(selectedloop)
+            }
+        }
         impl Hcp for GetLoopSignalMaster {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4480, 3)
@@ -748,6 +863,11 @@ pub mod Commands {
         pub enum IsActivated {
             inParams {},
             outParams { isActivated: bool },
+        }
+        impl IsActivated {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for IsActivated {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -765,6 +885,11 @@ pub mod Commands {
             },
             outParams {},
         }
+        impl WheelMotorsPower {
+            fn new(leftWheelMotorPower: i16, rightWheelMotorPower: i16) -> Self {
+                Self::inParams(leftWheelMotorPower, rightWheelMotorPower)
+            }
+        }
         impl Hcp for WheelMotorsPower {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(16, 2)
@@ -780,6 +905,11 @@ pub mod Commands {
             },
             outParams {},
         }
+        impl SetMode {
+            fn new(modeOfOperation: Types::tIMowerApp_MowerMode) -> Self {
+                Self::inParams(modeOfOperation)
+            }
+        }
         impl Hcp for SetMode {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 0)
@@ -792,6 +922,11 @@ pub mod Commands {
                 modeOfOperation: Types::tIMowerApp_MowerMode,
             },
         }
+        impl GetMode {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetMode {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 1)
@@ -801,6 +936,11 @@ pub mod Commands {
         pub enum GetState {
             inParams {},
             outParams { mowerState: Types::tIMowerApp_State },
+        }
+        impl GetState {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for GetState {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -812,6 +952,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl StartTrigger {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for StartTrigger {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 4)
@@ -821,6 +966,11 @@ pub mod Commands {
         pub enum Pause {
             inParams {},
             outParams {},
+        }
+        impl Pause {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for Pause {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -835,6 +985,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl Brake {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for Brake {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4362, 0)
@@ -844,6 +999,11 @@ pub mod Commands {
         pub enum Run {
             inParams {},
             outParams {},
+        }
+        impl Run {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for Run {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -855,6 +1015,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl On {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for On {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4362, 9)
@@ -864,6 +1029,11 @@ pub mod Commands {
         pub enum Off {
             inParams {},
             outParams {},
+        }
+        impl Off {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for Off {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -878,6 +1048,11 @@ pub mod Commands {
             inParams { height: u8 },
             outParams { retVal: Types::tReturn },
         }
+        impl SetHeight {
+            fn new(height: u8) -> Self {
+                Self::inParams(height)
+            }
+        }
         impl Hcp for SetHeight {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4488, 8)
@@ -891,6 +1066,11 @@ pub mod Commands {
             inParams { soundType: Types::tSoundType },
             outParams { soundType: Types::tSoundType },
         }
+        impl SetSoundType {
+            fn new(soundType: Types::tSoundType) -> Self {
+                Self::inParams(soundType)
+            }
+        }
         impl Hcp for SetSoundType {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4268, 0)
@@ -900,6 +1080,11 @@ pub mod Commands {
         pub enum GetSoundType {
             inParams {},
             outParams { soundType: Types::tSoundType },
+        }
+        impl GetSoundType {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for GetSoundType {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -936,6 +1121,11 @@ pub mod Commands {
                 powerModeLedBroken: bool,
             },
         }
+        impl GetStatus {
+            fn new() -> Self {
+                Self::inParams()
+            }
+        }
         impl Hcp for GetStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4466, 0)
@@ -948,6 +1138,11 @@ pub mod Commands {
         pub enum ClearOverride {
             inParams {},
             outParams {},
+        }
+        impl ClearOverride {
+            fn new() -> Self {
+                Self::inParams()
+            }
         }
         impl Hcp for ClearOverride {
             fn get_msgtype_subcmd() -> Msgtype {
