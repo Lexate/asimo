@@ -35,8 +35,8 @@ def gen_types(types: dict) -> str:
             contents.append(f"{variant["key"]}, //{variant["description"]}\n")
         contents.append("}\n")
 
-        contents.append(f"impl HcpType for {name} {"{"} \n")
-        contents.append("fn u8_to_variant(value: u8) -> Result<impl HcpType> {\n")
+        contents.append(f"impl {name} {"{"} \n")
+        contents.append("fn u8_to_variant(value: u8) -> Result<Self> {\n")
         contents.append("match value {\n")
         for variant in type["enums"]:
             contents.append(f"{variant["value"]} => Ok(Self::{variant["key"]}),")
@@ -50,7 +50,7 @@ def gen_types(types: dict) -> str:
         contents.append("}}}\n")
 
         contents.append(f"impl Serialize for {name}" + "{")
-        contents.append("fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer, {")
+        contents.append("fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: Serializer, {")
         contents.append("serializer.serialize_u8(self.to_u8())")
         contents.append("}}")
 
@@ -64,56 +64,27 @@ impl<'de> Visitor<'de> for {name}Visitor {"{"}
         formatter.write_str("an unsigned integer coresponding to a enum variant")
     {"}"}
 
-    fn visit_u8<E>(self, value: u8) -> Result<Self::Value, E>
+    fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
     where
         E: de::Error,
     {"{"}
-        match self
+        match Self::Value::u8_to_variant(value) {"{"}
+            Ok(v) => std::result::Result::Ok(v),
+            Err(e) => std::result::Result::Err()
+        {"}"}
     {"}"}
-    fn visit_i8<E>(self, value: i8) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_u16<E>(self, value: u16) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_i16<E>(self, value: i16) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_u32<E>(self, value: u32) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_i32<E>(self, value: i32) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_u64<E>(self, value: u64) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
-        
-    {"}"}
-    fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
-    where
-        E: de::Error,
-    {"{"}
+{"}"}
 
+impl<'de> Deserialize<'de> for {name} {"{"}
+    fn deserialize<D>(deserializer: D) -> std::result::Result<{name}, D::Error>
+    where
+        D: Deserializer<'de>,
+    {"{"}
+        deserializer.deserialize_u8({name}Visitor)
     {"}"}
 {"}"}
         """
+        contents.append(visitor)
         
     return "".join(contents)
 
@@ -150,7 +121,7 @@ def gen_method_enum(method: dict) -> str:
     contents.append("fn new(")
     contents.append(", ".join([f"{clean_name(a["name"])}: {convert_type_name(a["type"])}" for a in method["inParams"]]) + ")")
     contents.append(" -> Self {")
-    contents.append(f"Self::inParams({", ".join([clean_name(a["name"]) for a in method["inParams"]])})")
+    contents.append(f"Self::inParams{"{"}{", ".join([clean_name(a["name"]) for a in method["inParams"]])}{"}"}")
     contents.append("}")
     contents.append("}")
 
@@ -182,13 +153,16 @@ def main(data):
     contents.append("""#![allow(non_camel_case_types)] // I should proably change the python code
 #![allow(non_snake_case)]
 #![allow(unused)] // for now
+use std::fmt;
 use serde::{Serialize,Deserialize};
+use serde::ser::Serializer;
+use serde::de::{self, Visitor, Deserializer};
 
 use crate::error::{Error, Result};
 use crate::type_methods::{Msgtype, Hcp, HcpType};
 
 """)
-    contents.append("pub mod Types {\n use super::{Error, HcpType, Result, Serialize, Deserialize};")
+    contents.append("pub mod Types {\n use super::*;")
     contents.append(gen_types(data["Types"]))
     contents.append("}\n")
 

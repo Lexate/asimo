@@ -34,5 +34,5 @@ pub trait Hcp {
 pub trait HcpType {
     fn u8_to_variant(value: u8) -> Result<impl HcpType>;
 
-    fn to_u8(value: Self) -> u8;
+    fn to_u8(&self) -> u8;
 }

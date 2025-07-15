@@ -1,14 +1,17 @@
 #![allow(non_camel_case_types)] // I should proably change the python code
 #![allow(non_snake_case)]
 #![allow(unused)] // for now
+use serde::de::{self, Deserializer, Visitor};
+use serde::ser::Serializer;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 use crate::error::{Error, Result};
 use crate::type_methods::{Hcp, HcpType, Msgtype};
 
 pub mod Types {
-    use super::{Deserialize, Error, HcpType, Result, Serialize};
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    use super::*;
+    #[derive(Clone, Copy)]
     pub enum tILoopSamplerLoops {
         LOOPSAMPLER_LOOP_A,          //A
         LOOPSAMPLER_LOOP_F,          //F
@@ -18,8 +21,8 @@ pub mod Types {
         LOOPSAMPLER_LOOP_G3,         //Guide 3
         LOOPSAMPLER_NUMBER_OF_LOOPS, //
     }
-    impl HcpType for tILoopSamplerLoops {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tILoopSamplerLoops {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::LOOPSAMPLER_LOOP_A),
                 1 => Ok(Self::LOOPSAMPLER_LOOP_F),
@@ -33,8 +36,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::LOOPSAMPLER_LOOP_A => 0,
                 Self::LOOPSAMPLER_LOOP_F => 1,
                 Self::LOOPSAMPLER_LOOP_N => 2,
@@ -45,15 +48,51 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tILoopSamplerLoops {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tILoopSamplerLoopsVisitor;
+
+    impl<'de> Visitor<'de> for tILoopSamplerLoopsVisitor {
+        type Value = tILoopSamplerLoops;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tILoopSamplerLoops {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tILoopSamplerLoops, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tILoopSamplerLoopsVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tIMowerApp_MowerMode {
         IMOWERAPP_MODE_AUTO,   //Auto
         IMOWERAPP_MODE_MANUAL, //Manual
         IMOWERAPP_MODE_HOME,   //Home
         IMOWERAPP_MODE_DEMO,   //Demo
     }
-    impl HcpType for tIMowerApp_MowerMode {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tIMowerApp_MowerMode {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::IMOWERAPP_MODE_AUTO),
                 1 => Ok(Self::IMOWERAPP_MODE_MANUAL),
@@ -64,8 +103,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::IMOWERAPP_MODE_AUTO => 0,
                 Self::IMOWERAPP_MODE_MANUAL => 1,
                 Self::IMOWERAPP_MODE_HOME => 2,
@@ -73,7 +112,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tIMowerApp_MowerMode {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tIMowerApp_MowerModeVisitor;
+
+    impl<'de> Visitor<'de> for tIMowerApp_MowerModeVisitor {
+        type Value = tIMowerApp_MowerMode;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(e),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tIMowerApp_MowerMode {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tIMowerApp_MowerMode, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tIMowerApp_MowerModeVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tIMowerApp_State {
         IMOWERAPP_STATE_OFF,                //Off
         IMOWERAPP_STATE_WAIT_FOR_SAFETYPIN, //Wait for safety pin
@@ -85,8 +160,8 @@ pub mod Types {
         IMOWERAPP_STATE_RESTRICTED,         //Restricted
         IMOWERAPP_STATE_ERROR,              //Error
     }
-    impl HcpType for tIMowerApp_State {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tIMowerApp_State {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::IMOWERAPP_STATE_OFF),
                 1 => Ok(Self::IMOWERAPP_STATE_WAIT_FOR_SAFETYPIN),
@@ -102,8 +177,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::IMOWERAPP_STATE_OFF => 0,
                 Self::IMOWERAPP_STATE_WAIT_FOR_SAFETYPIN => 1,
                 Self::IMOWERAPP_STATE_STOPPED => 2,
@@ -116,7 +191,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tIMowerApp_State {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tIMowerApp_StateVisitor;
+
+    impl<'de> Visitor<'de> for tIMowerApp_StateVisitor {
+        type Value = tIMowerApp_State;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tIMowerApp_State {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tIMowerApp_State, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tIMowerApp_StateVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tReturn {
         OK,              //OK
         E_UNDEFINED,     //Undefined error
@@ -130,8 +241,8 @@ pub mod Types {
         I_BUSY,          //Info: Busy. No action needed
         I_QUEUED,        //Info: The call put in queue
     }
-    impl HcpType for tReturn {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tReturn {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::OK),
                 1 => Ok(Self::E_UNDEFINED),
@@ -149,8 +260,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::OK => 0,
                 Self::E_UNDEFINED => 1,
                 Self::E_INVALID_VALUE => 2,
@@ -165,7 +276,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tReturn {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tReturnVisitor;
+
+    impl<'de> Visitor<'de> for tReturnVisitor {
+        type Value = tReturn;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tReturn {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tReturn, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tReturnVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tDeviceTypeGroup {
         DEVICE_TYPE_GROUP_UNDEFINED,     //
         DEVICE_TYPE_GROUP_GPS_BOARD,     //
@@ -189,8 +336,8 @@ pub mod Types {
         DEVICE_TYPE_GROUP_SW_ULTRASONIC, //
         DEVICE_TYPE_GROUP_SW_COM,        //
     }
-    impl HcpType for tDeviceTypeGroup {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tDeviceTypeGroup {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::DEVICE_TYPE_GROUP_UNDEFINED),
                 1 => Ok(Self::DEVICE_TYPE_GROUP_GPS_BOARD),
@@ -218,8 +365,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::DEVICE_TYPE_GROUP_UNDEFINED => 0,
                 Self::DEVICE_TYPE_GROUP_GPS_BOARD => 1,
                 Self::DEVICE_TYPE_GROUP_MOWER => 10,
@@ -244,7 +391,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tDeviceTypeGroup {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tDeviceTypeGroupVisitor;
+
+    impl<'de> Visitor<'de> for tDeviceTypeGroupVisitor {
+        type Value = tDeviceTypeGroup;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tDeviceTypeGroup {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tDeviceTypeGroup, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tDeviceTypeGroupVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tMowerDeviceType {
         MOWER_DEVICE_TYPE_UNDEFINED, //
         MOWER_DEVICE_TYPE_B,         //
@@ -265,8 +448,8 @@ pub mod Types {
         MOWER_DEVICE_TYPE_Q,         //
         MOWER_DEVICE_TYPE_NO_MORE,   //
     }
-    impl HcpType for tMowerDeviceType {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tMowerDeviceType {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::MOWER_DEVICE_TYPE_UNDEFINED),
                 1 => Ok(Self::MOWER_DEVICE_TYPE_B),
@@ -291,8 +474,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::MOWER_DEVICE_TYPE_UNDEFINED => 0,
                 Self::MOWER_DEVICE_TYPE_B => 1,
                 Self::MOWER_DEVICE_TYPE_C => 2,
@@ -314,7 +497,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tMowerDeviceType {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tMowerDeviceTypeVisitor;
+
+    impl<'de> Visitor<'de> for tMowerDeviceTypeVisitor {
+        type Value = tMowerDeviceType;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tMowerDeviceType {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tMowerDeviceType, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tMowerDeviceTypeVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tMowerVariantType {
         MOWER_VARIANT_TYPE_UNDEFINED, //
         MOWER_VARIANT_TYPE_ORG,       //
@@ -325,8 +544,8 @@ pub mod Types {
         MOWER_VARIANT_TYPE_F,         //
         MOWER_VARIANT_TYPE_NO_MORE,   //
     }
-    impl HcpType for tMowerVariantType {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tMowerVariantType {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 255 => Ok(Self::MOWER_VARIANT_TYPE_UNDEFINED),
                 0 => Ok(Self::MOWER_VARIANT_TYPE_ORG),
@@ -341,8 +560,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::MOWER_VARIANT_TYPE_UNDEFINED => 255,
                 Self::MOWER_VARIANT_TYPE_ORG => 0,
                 Self::MOWER_VARIANT_TYPE_B => 1,
@@ -354,7 +573,43 @@ pub mod Types {
             }
         }
     }
-    #[derive(Clone, Copy, Serialize, Deserialize)]
+    impl Serialize for tMowerVariantType {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tMowerVariantTypeVisitor;
+
+    impl<'de> Visitor<'de> for tMowerVariantTypeVisitor {
+        type Value = tMowerVariantType;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tMowerVariantType {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tMowerVariantType, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tMowerVariantTypeVisitor)
+        }
+    }
+    #[derive(Clone, Copy)]
     pub enum tSoundType {
         SOUND_KEY_CLICK,             //Key Click
         SOUND_CLICK,                 //Click Sound
@@ -372,8 +627,8 @@ pub mod Types {
         SOUND_TONE_1,                //Tone 1 minute
         SOUND_OFF,                   //Sound Off
     }
-    impl HcpType for tSoundType {
-        fn u8_to_variant(value: u8) -> Result<impl HcpType> {
+    impl tSoundType {
+        fn u8_to_variant(value: u8) -> Result<Self> {
             match value {
                 0 => Ok(Self::SOUND_KEY_CLICK),
                 1 => Ok(Self::SOUND_CLICK),
@@ -395,8 +650,8 @@ pub mod Types {
                 ))),
             }
         }
-        fn to_u8(value: Self) -> u8 {
-            match value {
+        fn to_u8(&self) -> u8 {
+            match *self {
                 Self::SOUND_KEY_CLICK => 0,
                 Self::SOUND_CLICK => 1,
                 Self::SOUND_CHARGING_CONNECTED => 2,
@@ -415,6 +670,42 @@ pub mod Types {
             }
         }
     }
+    impl Serialize for tSoundType {
+        fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_u8(self.to_u8())
+        }
+    }
+    struct tSoundTypeVisitor;
+
+    impl<'de> Visitor<'de> for tSoundTypeVisitor {
+        type Value = tSoundType;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer coresponding to a enum variant")
+        }
+
+        fn visit_u8<E>(self, value: u8) -> std::result::Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            match Self::Value::u8_to_variant(value) {
+                Ok(v) => std::result::Result::Ok(v),
+                Err(e) => std::result::Result::Err(),
+            }
+        }
+    }
+
+    impl<'de> Deserialize<'de> for tSoundType {
+        fn deserialize<D>(deserializer: D) -> std::result::Result<tSoundType, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            deserializer.deserialize_u8(tSoundTypeVisitor)
+        }
+    }
 }
 pub mod Commands {
     pub mod DeviceInformation {
@@ -428,6 +719,11 @@ pub mod Commands {
                 mowerSerialNo: u32,
                 mowerVariantType: Types::tMowerVariantType,
             },
+        }
+        impl GetDeviceIdentification {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetDeviceIdentification {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -450,6 +746,11 @@ pub mod Commands {
                 difference: i16,
             },
         }
+        impl GetWheelMotorData {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetWheelMotorData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 2)
@@ -470,6 +771,11 @@ pub mod Commands {
                 batbtemp: i16,
                 batbcapacity: i16,
             },
+        }
+        impl GetBatteryData {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetBatteryData {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -497,6 +803,11 @@ pub mod Commands {
                 gpsstatus: u8,
             },
         }
+        impl GetGPSData {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetGPSData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 7)
@@ -512,6 +823,11 @@ pub mod Commands {
                 upsidedown: u8,
                 mowertemp: i16,
             },
+        }
+        impl GetComboardSensorData {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetComboardSensorData {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -531,6 +847,11 @@ pub mod Commands {
                 mowertemp: i16,
             },
         }
+        impl GetSensorData {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetSensorData {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(20, 4)
@@ -544,6 +865,11 @@ pub mod Commands {
             inParams { headlight: u8 },
             outParams { headlight: u8 },
         }
+        impl SetHeadlightEnabled {
+            fn new(headlight: u8) -> Self {
+                Self::inParams { headlight }
+            }
+        }
         impl Hcp for SetHeadlightEnabled {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(2, 0x94)
@@ -554,6 +880,11 @@ pub mod Commands {
             inParams {},
             outParams { loopDetection: u8 },
         }
+        impl GetLoopDetection {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetLoopDetection {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(2, 0x08)
@@ -563,6 +894,11 @@ pub mod Commands {
         pub enum SetLoopDetection {
             inParams { loopDetection: u8 },
             outParams { loopDetection: u8 },
+        }
+        impl SetLoopDetection {
+            fn new(loopDetection: u8) -> Self {
+                Self::inParams { loopDetection }
+            }
         }
         impl Hcp for SetLoopDetection {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -577,6 +913,11 @@ pub mod Commands {
             inParams { index: u8 },
             outParams { speed: i16 },
         }
+        impl GetSpeed {
+            fn new(index: u8) -> Self {
+                Self::inParams { index }
+            }
+        }
         impl Hcp for GetSpeed {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4336, 6)
@@ -586,6 +927,11 @@ pub mod Commands {
         pub enum GetRotationCounter {
             inParams { index: u8 },
             outParams { counter: i32 },
+        }
+        impl GetRotationCounter {
+            fn new(index: u8) -> Self {
+                Self::inParams { index }
+            }
         }
         impl Hcp for GetRotationCounter {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -597,6 +943,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl PowerOff {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for PowerOff {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4336, 8)
@@ -606,6 +957,11 @@ pub mod Commands {
         pub enum PowerOn {
             inParams {},
             outParams {},
+        }
+        impl PowerOn {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for PowerOn {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -624,6 +980,11 @@ pub mod Commands {
                 collisionRearLeft: bool,
             },
         }
+        impl GetStatus {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 2)
@@ -633,6 +994,11 @@ pub mod Commands {
         pub enum SetSimulation {
             inParams { onOff: bool },
             outParams { onOff: bool },
+        }
+        impl SetSimulation {
+            fn new(onOff: bool) -> Self {
+                Self::inParams { onOff }
+            }
         }
         impl Hcp for SetSimulation {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -644,6 +1010,11 @@ pub mod Commands {
             inParams {},
             outParams { onOff: bool },
         }
+        impl GetSimulation {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetSimulation {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 6)
@@ -654,6 +1025,11 @@ pub mod Commands {
             inParams { status: u32 },
             outParams { status: u32 },
         }
+        impl SetSimulatedStatus {
+            fn new(status: u32) -> Self {
+                Self::inParams { status }
+            }
+        }
         impl Hcp for SetSimulatedStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4166, 7)
@@ -663,6 +1039,11 @@ pub mod Commands {
         pub enum GetSimulatedStatus {
             inParams {},
             outParams { status: u32 },
+        }
+        impl GetSimulatedStatus {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetSimulatedStatus {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -677,6 +1058,11 @@ pub mod Commands {
             inParams {},
             outParams { isChargingEnabled: bool },
         }
+        impl IsChargingEnabled {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for IsChargingEnabled {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4486, 3)
@@ -686,6 +1072,11 @@ pub mod Commands {
         pub enum IsChargingPowerConnected {
             inParams {},
             outParams { isChargingPowerConnected: bool },
+        }
+        impl IsChargingPowerConnected {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for IsChargingPowerConnected {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -699,6 +1090,11 @@ pub mod Commands {
         pub enum IsActivated {
             inParams {},
             outParams { isActivated: bool },
+        }
+        impl IsActivated {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for IsActivated {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -719,6 +1115,11 @@ pub mod Commands {
                 hostMessage: u16,
             },
         }
+        impl GetStatusKeepAlive {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetStatusKeepAlive {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(18, 0x80)
@@ -736,6 +1137,11 @@ pub mod Commands {
                 signalLevel: i16,
             },
         }
+        impl GetLoopSignalMaster {
+            fn new(selectedloop: Types::tILoopSamplerLoops) -> Self {
+                Self::inParams { selectedloop }
+            }
+        }
         impl Hcp for GetLoopSignalMaster {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4480, 3)
@@ -748,6 +1154,11 @@ pub mod Commands {
         pub enum IsActivated {
             inParams {},
             outParams { isActivated: bool },
+        }
+        impl IsActivated {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for IsActivated {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -765,6 +1176,14 @@ pub mod Commands {
             },
             outParams {},
         }
+        impl WheelMotorsPower {
+            fn new(leftWheelMotorPower: i16, rightWheelMotorPower: i16) -> Self {
+                Self::inParams {
+                    leftWheelMotorPower,
+                    rightWheelMotorPower,
+                }
+            }
+        }
         impl Hcp for WheelMotorsPower {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(16, 2)
@@ -780,6 +1199,11 @@ pub mod Commands {
             },
             outParams {},
         }
+        impl SetMode {
+            fn new(modeOfOperation: Types::tIMowerApp_MowerMode) -> Self {
+                Self::inParams { modeOfOperation }
+            }
+        }
         impl Hcp for SetMode {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 0)
@@ -792,6 +1216,11 @@ pub mod Commands {
                 modeOfOperation: Types::tIMowerApp_MowerMode,
             },
         }
+        impl GetMode {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetMode {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 1)
@@ -801,6 +1230,11 @@ pub mod Commands {
         pub enum GetState {
             inParams {},
             outParams { mowerState: Types::tIMowerApp_State },
+        }
+        impl GetState {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetState {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -812,6 +1246,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl StartTrigger {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for StartTrigger {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4586, 4)
@@ -821,6 +1260,11 @@ pub mod Commands {
         pub enum Pause {
             inParams {},
             outParams {},
+        }
+        impl Pause {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for Pause {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -835,6 +1279,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl Brake {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for Brake {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4362, 0)
@@ -844,6 +1293,11 @@ pub mod Commands {
         pub enum Run {
             inParams {},
             outParams {},
+        }
+        impl Run {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for Run {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -855,6 +1309,11 @@ pub mod Commands {
             inParams {},
             outParams {},
         }
+        impl On {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for On {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4362, 9)
@@ -864,6 +1323,11 @@ pub mod Commands {
         pub enum Off {
             inParams {},
             outParams {},
+        }
+        impl Off {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for Off {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -878,6 +1342,11 @@ pub mod Commands {
             inParams { height: u8 },
             outParams { retVal: Types::tReturn },
         }
+        impl SetHeight {
+            fn new(height: u8) -> Self {
+                Self::inParams { height }
+            }
+        }
         impl Hcp for SetHeight {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4488, 8)
@@ -891,6 +1360,11 @@ pub mod Commands {
             inParams { soundType: Types::tSoundType },
             outParams { soundType: Types::tSoundType },
         }
+        impl SetSoundType {
+            fn new(soundType: Types::tSoundType) -> Self {
+                Self::inParams { soundType }
+            }
+        }
         impl Hcp for SetSoundType {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4268, 0)
@@ -900,6 +1374,11 @@ pub mod Commands {
         pub enum GetSoundType {
             inParams {},
             outParams { soundType: Types::tSoundType },
+        }
+        impl GetSoundType {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for GetSoundType {
             fn get_msgtype_subcmd() -> Msgtype {
@@ -936,6 +1415,11 @@ pub mod Commands {
                 powerModeLedBroken: bool,
             },
         }
+        impl GetStatus {
+            fn new() -> Self {
+                Self::inParams {}
+            }
+        }
         impl Hcp for GetStatus {
             fn get_msgtype_subcmd() -> Msgtype {
                 Msgtype::new(4466, 0)
@@ -948,6 +1432,11 @@ pub mod Commands {
         pub enum ClearOverride {
             inParams {},
             outParams {},
+        }
+        impl ClearOverride {
+            fn new() -> Self {
+                Self::inParams {}
+            }
         }
         impl Hcp for ClearOverride {
             fn get_msgtype_subcmd() -> Msgtype {

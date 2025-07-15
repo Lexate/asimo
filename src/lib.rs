@@ -1,5 +1,5 @@
 mod gen_types;
-pub use crate::gen_types::Types;
+pub use crate::gen_types::{Commands, Types};
 mod type_methods;
 
 mod error;
@@ -79,5 +79,15 @@ pub mod proto {
             crc = CRC_TABLE[(crc ^ i) as usize]
         }
         crc
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn full_encode_chain() {
+        // let result = Commands::Wheels::GetSpeed::
     }
 }
