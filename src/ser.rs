@@ -1,7 +1,10 @@
+use std::io::BufRead;
+
 use serde::{ser, Serialize};
 
 use crate::error::{Error, Result};
-use crate::{proto, Hcp};
+use crate::proto;
+use crate::type_methods::Hcp;
 
 pub struct Serializer {
     // This string starts empty and bytes appended as values are serialized.
@@ -14,7 +17,50 @@ where
 {
     let mut serializer = Serializer { output: Vec::new() };
     value.serialize(&mut serializer)?;
-    Ok(serializer.output)
+    let mut payload = serializer.output;
+    let message_type = T::get_msgtype_subcmd();
+
+    let mut out: Vec<u8> = vec![0x02]; // Stx
+
+    if message_type.get_msgtype().len() > 1 {
+        out.reserve(payload.len() + 10);
+        // This means we are encoding amg3 which starts with an 0x81 id byte
+        out.push(0x81);
+
+        // length goes here in the end
+
+        // This value is anotated as a transition id in the original implementation
+        // in all examples I have seen this has been set to zero so this might
+        // need to be expanded in future when I understand more.
+        out.push(0x00);
+        // Add the message type for amg3 this is two bytes
+        out.extend(message_type.get_msgtype());
+        // Payload lenght + 1 for the sub command
+        out.push((payload.len() as u8) + 1);
+        // subcmd
+        out.push(*message_type.get_subcmd());
+        // payload
+        out.append(payload.as_mut());
+        // Splice length into position 2 now that we know the final lenght
+        out.splice(2..2, (out.len() as u16).to_le_bytes());
+    } else {
+        out.reserve(payload.len() + 5);
+        // This means we are using amproto
+        // messagetype 1 byte for amproto
+        assert!(message_type.get_msgtype().len() == 1);
+        out.extend(message_type.get_msgtype());
+        // Lenth added later
+        // subcmd
+        out.push(*message_type.get_subcmd());
+        // payload
+        out.append(payload.as_mut());
+        // length, - 2 to skip stx and msgtype
+        out.insert(2, (out.len() - 2) as u8);
+    }
+    // crc
+    out.push(proto::calc_crc(&out, 1));
+    out.push(0x03); // etx
+    Ok(out)
 }
 
 impl<'a> ser::Serializer for &'a mut Serializer {

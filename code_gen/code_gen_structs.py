@@ -70,7 +70,7 @@ impl<'de> Visitor<'de> for {name}Visitor {"{"}
     {"{"}
         match Self::Value::u8_to_variant(value) {"{"}
             Ok(v) => std::result::Result::Ok(v),
-            Err(e) => std::result::Result::Err()
+            Err(e) => std::result::Result::Err(de::Error::custom(format!("{"{"}value{"}"} does not corespond to an enum variant"))),
         {"}"}
     {"}"}
 {"}"}

@@ -71,7 +71,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -135,7 +137,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(e),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -214,7 +218,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -299,7 +305,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -414,7 +422,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -520,7 +530,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -596,7 +608,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }
@@ -693,7 +707,9 @@ pub mod Types {
         {
             match Self::Value::u8_to_variant(value) {
                 Ok(v) => std::result::Result::Ok(v),
-                Err(e) => std::result::Result::Err(),
+                Err(e) => std::result::Result::Err(de::Error::custom(format!(
+                    "{value} does not corespond to an enum variant"
+                ))),
             }
         }
     }

@@ -9,12 +9,6 @@ pub use ser::{to_bytes, Serializer};
 mod de;
 pub use de::Deserializer;
 
-trait Hcp {
-    // Tuple is (msgtype: u16, subcmd: u8)
-    fn get_msgtype_subcmd() -> (u16, u8);
-    fn get_outparams() -> Self;
-}
-
 pub mod comms {
     use crate::{proto, type_methods::Hcp};
     use serialport::SerialPort;
@@ -49,14 +43,14 @@ pub mod comms {
         }
 
         pub fn send_message(&mut self, message: &impl Hcp) -> Result<Vec<u8>, std::io::Error> {
-            let (bytes, _subcmd) = proto::encode(message);
-            self.send(bytes)
+            // let (bytes, _subcmd) = proto::encode(message);
+            // self.send(bytes)
+            unimplemented!()
         }
     }
 }
 
 pub mod proto {
-    use crate::{gen_types::Types::*, type_methods::Hcp};
     const CRC_TABLE: [u8; 256] = [
         0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
         252, 162, 64, 30, 95, 1, 227, 189, 62, 96, 130, 220, 35, 125, 159, 193, 66, 28, 254, 160,
@@ -73,7 +67,7 @@ pub mod proto {
         246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
     ];
 
-    fn calc_crc(array: &[u8], start: usize) -> u8 {
+    pub fn calc_crc(array: &[u8], start: usize) -> u8 {
         let mut crc = 0;
         for i in &array[start..] {
             crc = CRC_TABLE[(crc ^ i) as usize]
@@ -84,10 +78,27 @@ pub mod proto {
 
 #[cfg(test)]
 mod tests {
+    use serde::Serialize;
+
     use super::*;
 
     #[test]
-    fn full_encode_chain() {
-        // let result = Commands::Wheels::GetSpeed::
+    fn serialize_setsoundtype() {
+        let command = Commands::Sound::SetSoundType::inParams {
+            soundType: Types::tSoundType::SOUND_CLICK,
+        };
+        assert_eq!(
+            to_bytes(&command).unwrap(),
+            vec![0x02, 0x81, 0x08, 0x00, 0x00, 0x90, 0xac, 0x02, 0x00, 0x01, 0x3e, 0x03]
+        )
+    }
+
+    #[test]
+    fn serialize_deviceid() {
+        let command = Commands::DeviceInformation::GetDeviceIdentification::inParams {};
+        assert_eq!(
+            to_bytes(&command).unwrap(),
+            vec![0x2, 0x16, 0x1, 0x0, 0x5f, 0x3]
+        );
     }
 }
