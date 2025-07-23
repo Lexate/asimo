@@ -7,7 +7,7 @@ pub use error::{Error, Result};
 mod ser;
 pub use ser::{to_bytes, Serializer};
 mod de;
-pub use de::Deserializer;
+pub use de::{from_bytes, Deserializer};
 
 pub mod comms {
     use crate::{proto, type_methods::Hcp};
@@ -78,7 +78,6 @@ pub mod proto {
 
 #[cfg(test)]
 mod tests {
-    use serde::Serialize;
 
     use super::*;
 
@@ -100,5 +99,17 @@ mod tests {
             to_bytes(&command).unwrap(),
             vec![0x2, 0x16, 0x1, 0x0, 0x5f, 0x3]
         );
+    }
+
+    #[test]
+    fn deserialize_sensordata() {
+        let message = vec![
+            0x2, 0x15, 0xc, 0x0, 0x0, 0x0, 0xf8, 0xff, 0x0, 0x0, 0xcf, 0x3, 0x0, 0x10, 0x1, 0xd2,
+            0x3,
+        ];
+        let response: Commands::DeviceInformation::GetDeviceIdentification =
+            from_bytes(&message[2..15].to_vec()).unwrap();
+        println!("{:?}", response);
+        panic!()
     }
 }

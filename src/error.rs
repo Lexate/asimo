@@ -20,6 +20,14 @@ pub enum Error {
     UnsupportedType(String),
 
     DoesNotCorespondToVariant(String),
+
+    EndOfMessage,
+
+    UnExpectedValue(String),
+
+    TrailingBytes,
+
+    WontImplement,
     // Zero or more variants that can be created directly by the Serializer and
     // Deserializer without going through `ser::Error` and `de::Error`. These
     // are specific to the format, in this case JSON.
@@ -61,8 +69,12 @@ impl Display for Error {
                 typ
             )),
             Error::DoesNotCorespondToVariant(msg) => formatter.write_str(msg),
-            // Error::Eof => formatter.write_str("unexpected end of input"),
-            /* and so forth */
+            Error::EndOfMessage => formatter.write_str("Unexpected end of message"),
+            Error::UnExpectedValue(msg) => formatter.write_str(msg),
+            Error::TrailingBytes => formatter.write_str("Message has trailing bytes"),
+            Error::WontImplement => {
+                formatter.write_str("This does not make sense to implement for this format")
+            }
         }
     }
 }
