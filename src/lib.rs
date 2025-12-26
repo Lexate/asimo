@@ -103,12 +103,20 @@ mod tests {
 
     #[test]
     fn deserialize_sensordata() {
-        let message = vec![
-            0x2, 0x15, 0xc, 0x0, 0x0, 0x0, 0xf8, 0xff, 0x0, 0x0, 0xcf, 0x3, 0x0, 0x10, 0x1, 0xd2,
-            0x3,
+        let message = [
+            0x2, 0x17, 0x8, 0x0, 0xa, 0x8, 0x51, 0xda, 0x6c, 0xa, 0x0, 0xd8, 0x3,
         ];
-        let response: Commands::DeviceInformation::GetDeviceIdentification =
-            from_bytes(&message[2..15].to_vec()).unwrap();
+        let response: Result<Commands::DeviceInformation::GetDeviceIdentification> =
+            from_bytes(&message[4..11].to_vec());
+        println!("{:?}", response);
+        panic!()
+    }
+
+    #[test]
+    fn deserialize() {
+        let message = [0x02];
+        let response: Result<Commands::Sound::GetSoundType> = from_bytes(&message.to_vec());
+
         println!("{:?}", response);
         panic!()
     }
