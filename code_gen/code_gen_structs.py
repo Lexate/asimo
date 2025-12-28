@@ -31,7 +31,7 @@ def convert_type_name(name: str) -> str:
 def gen_types(types: dict) -> str:
     contents = []
     for name, type in types.items():
-        contents.append("#[derive(Clone, Copy, Debug)]\n")
+        contents.append("#[derive(Clone, Copy, Debug, PartialEq)]\n")
         contents.append(f"pub enum {name} {'{\n'}")
         for variant in type["enums"]:
             contents.append(f"{variant['key']}, //{variant['description']}\n")
@@ -106,7 +106,7 @@ def clean_name(name: str) -> str:
 
 def gen_method_enum(method: dict) -> str:
     contents = []
-    contents.append("#[derive(Clone, Copy, Debug, Serialize, Deserialize)]\n")
+    contents.append("#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]\n")
     contents.append("pub enum ")
     contents.append(method["command"])  # Add name
     contents.append(" {")

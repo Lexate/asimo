@@ -28,6 +28,10 @@ pub enum Error {
     TrailingBytes,
 
     WontImplement,
+
+    WrongLength { expected: usize, got: usize },
+
+    Crc { recived: u8, calculated: u8 },
     // Zero or more variants that can be created directly by the Serializer and
     // Deserializer without going through `ser::Error` and `de::Error`. These
     // are specific to the format, in this case JSON.
@@ -75,6 +79,15 @@ impl Display for Error {
             Error::WontImplement => {
                 formatter.write_str("This does not make sense to implement for this format")
             }
+            Error::WrongLength { expected, got } => formatter.write_str(&format!(
+                "Lenght is expected to be {expected} but is {got}."
+            )),
+            Error::Crc {
+                recived,
+                calculated,
+            } => formatter.write_str(&format!(
+                "CRC does not match recived: {recived:x}, calculated: {calculated:x}"
+            )),
         }
     }
 }

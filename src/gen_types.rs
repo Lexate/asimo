@@ -11,7 +11,7 @@ use crate::type_methods::{Hcp, HcpType, Msgtype};
 
 pub mod Types {
     use super::*;
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tILoopSamplerLoops {
         LOOPSAMPLER_LOOP_A,          //A
         LOOPSAMPLER_LOOP_F,          //F
@@ -86,7 +86,7 @@ pub mod Types {
             deserializer.deserialize_u8(tILoopSamplerLoopsVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tIMowerApp_MowerMode {
         IMOWERAPP_MODE_AUTO,   //Auto
         IMOWERAPP_MODE_MANUAL, //Manual
@@ -152,7 +152,7 @@ pub mod Types {
             deserializer.deserialize_u8(tIMowerApp_MowerModeVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tIMowerApp_State {
         IMOWERAPP_STATE_OFF,                //Off
         IMOWERAPP_STATE_WAIT_FOR_SAFETYPIN, //Wait for safety pin
@@ -233,7 +233,7 @@ pub mod Types {
             deserializer.deserialize_u8(tIMowerApp_StateVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tReturn {
         OK,              //OK
         E_UNDEFINED,     //Undefined error
@@ -320,7 +320,7 @@ pub mod Types {
             deserializer.deserialize_u8(tReturnVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tDeviceTypeGroup {
         DEVICE_TYPE_GROUP_UNDEFINED,     //
         DEVICE_TYPE_GROUP_GPS_BOARD,     //
@@ -437,7 +437,7 @@ pub mod Types {
             deserializer.deserialize_u8(tDeviceTypeGroupVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tMowerDeviceType {
         MOWER_DEVICE_TYPE_UNDEFINED, //
         MOWER_DEVICE_TYPE_B,         //
@@ -545,7 +545,7 @@ pub mod Types {
             deserializer.deserialize_u8(tMowerDeviceTypeVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tMowerVariantType {
         MOWER_VARIANT_TYPE_UNDEFINED, //
         MOWER_VARIANT_TYPE_ORG,       //
@@ -623,7 +623,7 @@ pub mod Types {
             deserializer.deserialize_u8(tMowerVariantTypeVisitor)
         }
     }
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq)]
     pub enum tSoundType {
         SOUND_KEY_CLICK,             //Key Click
         SOUND_CLICK,                 //Click Sound
@@ -726,7 +726,7 @@ pub mod Types {
 pub mod Commands {
     pub mod DeviceInformation {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetDeviceIdentification {
             outParams {
                 deviceTypeGroup: Types::tDeviceTypeGroup,
@@ -749,7 +749,7 @@ pub mod Commands {
     }
     pub mod RealTimeData {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetWheelMotorData {
             outParams {
                 powerleft: i16,
@@ -772,7 +772,7 @@ pub mod Commands {
                 Msgtype::new(20, 2)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetBatteryData {
             outParams {
                 batavoltage: u16,
@@ -798,7 +798,7 @@ pub mod Commands {
                 Msgtype::new(20, 1)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetGPSData {
             outParams {
                 quality: u8,
@@ -829,7 +829,7 @@ pub mod Commands {
                 Msgtype::new(20, 7)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetComboardSensorData {
             outParams {
                 pitch: i16,
@@ -850,7 +850,7 @@ pub mod Commands {
                 Msgtype::new(20, 140)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetSensorData {
             outParams {
                 collision: u8,
@@ -876,7 +876,7 @@ pub mod Commands {
     }
     pub mod SystemSettings {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetHeadlightEnabled {
             outParams { headlight: u8 },
             inParams { headlight: u8 },
@@ -891,7 +891,7 @@ pub mod Commands {
                 Msgtype::new(2, 0x94)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetLoopDetection {
             outParams { loopDetection: u8 },
             inParams {},
@@ -906,7 +906,7 @@ pub mod Commands {
                 Msgtype::new(2, 0x08)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetLoopDetection {
             outParams { loopDetection: u8 },
             inParams { loopDetection: u8 },
@@ -924,7 +924,7 @@ pub mod Commands {
     }
     pub mod Wheels {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetSpeed {
             outParams { speed: i16 },
             inParams { index: u8 },
@@ -939,7 +939,7 @@ pub mod Commands {
                 Msgtype::new(4336, 6)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetRotationCounter {
             outParams { counter: i32 },
             inParams { index: u8 },
@@ -954,7 +954,7 @@ pub mod Commands {
                 Msgtype::new(4336, 5)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum PowerOff {
             outParams {},
             inParams {},
@@ -969,7 +969,7 @@ pub mod Commands {
                 Msgtype::new(4336, 8)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum PowerOn {
             outParams {},
             inParams {},
@@ -987,7 +987,7 @@ pub mod Commands {
     }
     pub mod Collision {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetStatus {
             outParams {
                 collisionFrontCenter: bool,
@@ -1006,7 +1006,7 @@ pub mod Commands {
                 Msgtype::new(4166, 2)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetSimulation {
             outParams { onOff: bool },
             inParams { onOff: bool },
@@ -1021,7 +1021,7 @@ pub mod Commands {
                 Msgtype::new(4166, 5)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetSimulation {
             outParams { onOff: bool },
             inParams {},
@@ -1036,7 +1036,7 @@ pub mod Commands {
                 Msgtype::new(4166, 6)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetSimulatedStatus {
             outParams { status: u32 },
             inParams { status: u32 },
@@ -1051,7 +1051,7 @@ pub mod Commands {
                 Msgtype::new(4166, 7)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetSimulatedStatus {
             outParams { status: u32 },
             inParams {},
@@ -1069,7 +1069,7 @@ pub mod Commands {
     }
     pub mod Charger {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum IsChargingEnabled {
             outParams { isChargingEnabled: bool },
             inParams {},
@@ -1084,7 +1084,7 @@ pub mod Commands {
                 Msgtype::new(4486, 3)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum IsChargingPowerConnected {
             outParams { isChargingPowerConnected: bool },
             inParams {},
@@ -1102,7 +1102,7 @@ pub mod Commands {
     }
     pub mod LiftSensor {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum IsActivated {
             outParams { isActivated: bool },
             inParams {},
@@ -1120,7 +1120,7 @@ pub mod Commands {
     }
     pub mod CurrentStatus {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetStatusKeepAlive {
             outParams {
                 mainState: u8,
@@ -1144,7 +1144,7 @@ pub mod Commands {
     }
     pub mod LoopSampler {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetLoopSignalMaster {
             outParams {
                 signalLevel: i16,
@@ -1166,7 +1166,7 @@ pub mod Commands {
     }
     pub mod StopButton {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum IsActivated {
             outParams { isActivated: bool },
             inParams {},
@@ -1184,7 +1184,7 @@ pub mod Commands {
     }
     pub mod HardwareControl {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum WheelMotorsPower {
             outParams {},
             inParams {
@@ -1208,7 +1208,7 @@ pub mod Commands {
     }
     pub mod MowerApp {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetMode {
             outParams {},
             inParams {
@@ -1225,7 +1225,7 @@ pub mod Commands {
                 Msgtype::new(4586, 0)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetMode {
             outParams {
                 modeOfOperation: Types::tIMowerApp_MowerMode,
@@ -1242,7 +1242,7 @@ pub mod Commands {
                 Msgtype::new(4586, 1)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetState {
             outParams { mowerState: Types::tIMowerApp_State },
             inParams {},
@@ -1257,7 +1257,7 @@ pub mod Commands {
                 Msgtype::new(4586, 2)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum StartTrigger {
             outParams {},
             inParams {},
@@ -1272,7 +1272,7 @@ pub mod Commands {
                 Msgtype::new(4586, 4)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum Pause {
             outParams {},
             inParams {},
@@ -1290,7 +1290,7 @@ pub mod Commands {
     }
     pub mod BladeMotor {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum Brake {
             outParams {},
             inParams {},
@@ -1305,7 +1305,7 @@ pub mod Commands {
                 Msgtype::new(4362, 0)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum Run {
             outParams {},
             inParams {},
@@ -1320,7 +1320,7 @@ pub mod Commands {
                 Msgtype::new(4362, 1)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum On {
             outParams {},
             inParams {},
@@ -1335,7 +1335,7 @@ pub mod Commands {
                 Msgtype::new(4362, 9)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum Off {
             outParams {},
             inParams {},
@@ -1353,7 +1353,7 @@ pub mod Commands {
     }
     pub mod HeightMotor {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetHeight {
             outParams { retVal: Types::tReturn },
             inParams { height: u8 },
@@ -1371,7 +1371,7 @@ pub mod Commands {
     }
     pub mod Sound {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum SetSoundType {
             outParams { soundType: Types::tSoundType },
             inParams { soundType: Types::tSoundType },
@@ -1386,7 +1386,7 @@ pub mod Commands {
                 Msgtype::new(4268, 0)
             }
         }
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetSoundType {
             outParams { soundType: Types::tSoundType },
             inParams {},
@@ -1404,7 +1404,7 @@ pub mod Commands {
     }
     pub mod SafetySupervisor {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum GetStatus {
             outParams {
                 stopButtonPressed: bool,
@@ -1444,7 +1444,7 @@ pub mod Commands {
     }
     pub mod Planner {
         use super::super::{Deserialize, Hcp, Msgtype, Serialize, Types};
-        #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+        #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
         pub enum ClearOverride {
             outParams {},
             inParams {},

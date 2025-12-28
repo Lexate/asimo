@@ -1,3 +1,4 @@
+#[expect(unused)]
 mod gen_types;
 pub use crate::gen_types::{Commands, Types};
 mod type_methods;
@@ -10,7 +11,8 @@ mod de;
 pub use de::{from_bytes, Deserializer};
 
 pub mod comms {
-    use crate::{proto, type_methods::Hcp};
+    use crate::{to_bytes, type_methods::Hcp};
+    use serde::{Deserialize, Serialize};
     use serialport::SerialPort;
     use std::time::Duration;
 
@@ -29,7 +31,7 @@ pub mod comms {
             Ok(Self { port })
         }
 
-        pub(crate) fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
+        fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
             self.port.write_all(&message[..])?;
 
             let mut buf = vec![0u8; 256];
@@ -42,11 +44,12 @@ pub mod comms {
             }
         }
 
-        pub fn send_message(&mut self, message: &impl Hcp) -> Result<Vec<u8>, std::io::Error> {
-            // let (bytes, _subcmd) = proto::encode(message);
-            // self.send(bytes)
-            unimplemented!()
-        }
+        // pub fn send_message<T>(&mut self, message: &T) -> Result<T, std::io::Error>
+        // where
+        //     T: Hcp + Serialize + Deserialize,
+        // {
+        //     let response = to_bytes(message)?
+        // }
     }
 }
 
@@ -102,22 +105,69 @@ mod tests {
     }
 
     #[test]
-    fn deserialize_sensordata() {
+    fn deserialize_deviceid() {
         let message = [
             0x2, 0x17, 0x8, 0x0, 0xa, 0x8, 0x51, 0xda, 0x6c, 0xa, 0x0, 0xd8, 0x3,
         ];
-        let response: Result<Commands::DeviceInformation::GetDeviceIdentification> =
-            from_bytes(&message[4..11].to_vec());
+        let response: Commands::DeviceInformation::GetDeviceIdentification =
+            from_bytes(&message).unwrap();
+        let expected = Commands::DeviceInformation::GetDeviceIdentification::outParams {
+            deviceTypeGroup: Types::tDeviceTypeGroup::DEVICE_TYPE_GROUP_MOWER,
+            mowerDeviceType: Types::tMowerDeviceType::MOWER_DEVICE_TYPE_I,
+            mowerSerialNo: 174905937,
+            mowerVariantType: Types::tMowerVariantType::MOWER_VARIANT_TYPE_ORG,
+        };
+
+        assert_eq!(response, expected);
         println!("{:?}", response);
-        panic!()
     }
 
     #[test]
-    fn deserialize() {
-        let message = [0x02];
-        let response: Result<Commands::Sound::GetSoundType> = from_bytes(&message.to_vec());
+    fn deserialize_setsoundtype() {
+        let message = [
+            0x2, 0x81, 0x8, 0x0, 0x0, 0x90, 0xad, 0x2, 0x0, 0x1, 0xb1, 0x3,
+        ];
+        let response: Commands::Sound::SetSoundType = from_bytes(&message).unwrap();
+
+        let expected = Commands::Sound::SetSoundType::outParams {
+            soundType: Types::tSoundType::SOUND_CLICK,
+        };
 
         println!("{:?}", response);
-        panic!()
+
+        assert_eq!(response, expected);
+    }
+
+    #[test]
+    fn deserialize_getsafetysupervisor() {
+        let message = [
+            0x2, 0x81, 0x1c, 0x0, 0x0, 0x91, 0x73, 0x16, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x52, 0x3,
+        ];
+        let response: Commands::SafetySupervisor::GetStatus = from_bytes(&message).unwrap();
+        let expected = Commands::SafetySupervisor::GetStatus::outParams {
+            stopButtonPressed: false,
+            onOffSwitchInactive: false,
+            lifted: false,
+            upsideDown: false,
+            tooMuchTilt: false,
+            collision3s: false,
+            tooFarOutsideBoundary: false,
+            noLoopSignalWheels: false,
+            pinCodeNeeded: false,
+            twoSeperateActionsNeededBlade: false,
+            twoSeperateActionsNeededWheels: false,
+            warningSoundNeeded: true,
+            chargingOngoing: false,
+            noLoopSignalBlade: false,
+            collisionIsActive: false,
+            memNotValidated: false,
+            blade10sLift: false,
+            blade10sTilt: false,
+            blade10sCollision: false,
+            bladeUpSideDown: false,
+            powerModeLedBroken: false,
+        };
+        assert_eq!(response, expected);
     }
 }

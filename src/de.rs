@@ -8,26 +8,128 @@ use serde::de::{
 use serde::Deserialize;
 
 use crate::error::{Error, Result};
+use crate::proto::calc_crc;
+use crate::type_methods::Hcp;
 
 pub struct Deserializer<'de> {
     // This string starts with the input data and characters are truncated off
     // the beginning as data is parsed.
-    input: &'de Vec<u8>,
+    input: &'de [u8],
     place: usize,
 }
 
 impl<'de> Deserializer<'de> {
-    pub fn from_bytes(input: &'de Vec<u8>) -> Self {
+    pub fn from_bytes(input: &'de [u8]) -> Self {
         Deserializer { input, place: 0 }
     }
 }
 
-pub fn from_bytes<'a, T>(b: &'a Vec<u8>) -> Result<T>
+pub fn from_bytes<'a, T>(b: &'a [u8]) -> Result<T>
 where
-    T: Deserialize<'a>,
+    T: Deserialize<'a> + Hcp,
 {
+    let msgtype = T::get_msgtype_subcmd();
     let mut deserializer = Deserializer::from_bytes(b);
+
+    // Check STX
+    let stx = deserializer.take_n_bytes(1)?;
+    if stx != [0x02] {
+        return Err(Error::UnExpectedValue(format!(
+            "Expected STX: 2, got: {:?}",
+            stx
+        )));
+    }
+
+    let id = deserializer.take_n_bytes(1)?[0];
+
+    // Amproto
+    if id != 0x81 {
+        // Check message type
+        if id != msgtype.get_msgtype()[0] + 1 {
+            return Err(Error::UnExpectedValue(format!(
+                "Expected messagetype: {:?}, got: {:?}",
+                msgtype.get_msgtype()[0] + 1,
+                id,
+            )));
+        }
+
+        // Check that the reported payload length (hence the - 2) matches.
+        let length = deserializer.take_n_bytes(1)?[0];
+        if length as usize != deserializer.check_len() - 2 {
+            return Err(Error::WrongLength {
+                expected: length as usize,
+                got: deserializer.check_len() - 2,
+            });
+        };
+
+        // TODO: Check what this value means, it always seems to be zero.
+        assert_eq!(0, deserializer.take_n_bytes(1)?[0]);
+    } else {
+        let length = u16::from_le_bytes(deserializer.take_n_bytes(2)?.try_into().unwrap());
+        if length as usize != deserializer.check_len() {
+            return Err(Error::WrongLength {
+                expected: length as usize,
+                got: deserializer.check_len(),
+            });
+        };
+
+        // I don't really know what this does
+        let trans_id = deserializer.take_n_bytes(1)?[0];
+
+        // Check messagetype
+        let first_byte = deserializer.take_n_bytes(1)?[0];
+        let recived_msg_type = if first_byte < 0x7F {
+            first_byte as u16
+        } else {
+            u16::from_be_bytes([first_byte, deserializer.take_n_bytes(1)?[0]])
+        };
+
+        let expected_msg_type = u16::from_be_bytes(msgtype.get_msgtype().try_into().unwrap());
+
+        if recived_msg_type != expected_msg_type + 1 {
+            return Err(Error::UnExpectedValue(format!(
+                "Expected messagetype: {:?}, got: {:?}",
+                msgtype.get_msgtype(),
+                expected_msg_type + 1,
+            )));
+        };
+
+        // Check payload length
+        let length = deserializer.take_n_bytes(1)?[0];
+        if length as usize != deserializer.check_len() - 2 {
+            return Err(Error::WrongLength {
+                expected: length as usize,
+                got: deserializer.check_len() - 2,
+            });
+        };
+
+        // Command result, which I belive is usualy zero
+        let command_result = deserializer.take_n_bytes(1)?[0];
+        assert_eq!(command_result, 0);
+    }
+
     let t = T::deserialize(&mut deserializer)?;
+
+    // Check to see if the crc:s match
+    let crc = deserializer.take_n_bytes(1)?[0];
+    let calculated_crc = calc_crc(&b[..b.len() - 2], 1);
+
+    if crc != calculated_crc {
+        return Err(Error::Crc {
+            recived: crc,
+            calculated: calculated_crc,
+        });
+    }
+
+    // Check ETX
+    let etx = deserializer.take_n_bytes(1)?;
+    if etx != [0x03] {
+        return Err(Error::UnExpectedValue(format!(
+            "Expected ETX: 3, got: {:?}",
+            etx
+        )));
+    }
+
     if deserializer.input.len() == deserializer.place {
         Ok(t)
     } else {
@@ -55,6 +157,10 @@ impl<'de> Deserializer<'de> {
                 e
             ))),
         }
+    }
+
+    fn check_len(&self) -> usize {
+        self.input.len() - self.place
     }
 }
 
