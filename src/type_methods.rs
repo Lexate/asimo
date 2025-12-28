@@ -1,5 +1,3 @@
-use crate::error::Result;
-
 pub struct Msgtype {
     msgtype: u16, // Sometimes u8 sometimes u16
     subcmd: u8,   // Always u8
@@ -37,10 +35,4 @@ pub trait Hcp {
     fn get_msgtype_subcmd() -> Msgtype
     where
         Self: Sized;
-}
-
-pub trait HcpType {
-    fn u8_to_variant(value: u8) -> Result<impl HcpType>;
-
-    fn to_u8(&self) -> u8;
 }

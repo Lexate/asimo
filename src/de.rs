@@ -314,7 +314,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("unit".to_string()))
     }
 
     fn deserialize_unit_struct<V>(
@@ -325,7 +325,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("unit struct".to_string()))
     }
 
     fn deserialize_newtype_struct<V>(
@@ -336,7 +336,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("newtype struct".to_string()))
     }
 
     fn deserialize_seq<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
@@ -369,14 +369,14 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("tuple struct".to_string()))
     }
 
     fn deserialize_map<V>(self, visitor: V) -> std::result::Result<V::Value, Self::Error>
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("map".to_string()))
     }
 
     fn deserialize_struct<V>(
@@ -472,14 +472,14 @@ impl<'de, 'a> VariantAccess<'de> for &'a mut Deserializer<'de> {
     where
         T: DeserializeSeed<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("newtype variant".to_string()))
     }
 
     fn tuple_variant<V>(self, _len: usize, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        todo!()
+        Err(Error::UnsupportedType("newtype variant".to_string()))
     }
 
     fn struct_variant<V>(self, fields: &'static [&'static str], visitor: V) -> Result<V::Value>

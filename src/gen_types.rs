@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 use crate::error::{Error, Result};
-use crate::type_methods::{Hcp, HcpType, Msgtype};
+use crate::type_methods::{Hcp, Msgtype};
 
 pub mod Types {
     use super::*;

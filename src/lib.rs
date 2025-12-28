@@ -1,18 +1,18 @@
-#[expect(unused)]
 mod gen_types;
 pub use crate::gen_types::{Commands, Types};
 mod type_methods;
 
 mod error;
-pub use error::{Error, Result};
+pub use error::Error;
 mod ser;
 pub use ser::{to_bytes, Serializer};
 mod de;
 pub use de::{from_bytes, Deserializer};
 
 pub mod comms {
-    use crate::{to_bytes, type_methods::Hcp};
-    use serde::{Deserialize, Serialize};
+    use crate::{from_bytes, to_bytes, type_methods::Hcp};
+    use anyhow::Result;
+    use serde::{de::DeserializeOwned, Serialize};
     use serialport::SerialPort;
     use std::time::Duration;
 
@@ -21,17 +21,13 @@ pub mod comms {
     }
 
     impl Serial {
-        pub fn new(
-            path: &str,
-            baud_rate: u32,
-            timeout: Duration,
-        ) -> Result<Self, serialport::Error> {
+        pub fn new(path: &str, baud_rate: u32, timeout: Duration) -> Result<Self> {
             let port = serialport::new(path, baud_rate).timeout(timeout).open()?;
 
             Ok(Self { port })
         }
 
-        fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
+        fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>> {
             self.port.write_all(&message[..])?;
 
             let mut buf = vec![0u8; 256];
@@ -44,12 +40,15 @@ pub mod comms {
             }
         }
 
-        // pub fn send_message<T>(&mut self, message: &T) -> Result<T, std::io::Error>
-        // where
-        //     T: Hcp + Serialize + Deserialize,
-        // {
-        //     let response = to_bytes(message)?
-        // }
+        pub fn send_message<T>(&mut self, message: &T) -> Result<T>
+        where
+            T: Hcp + Serialize + DeserializeOwned,
+        {
+            let serialized = to_bytes(message)?;
+            let response = self.send(serialized)?;
+            let deserialized: T = from_bytes(&response)?;
+            Ok(deserialized)
+        }
     }
 }
 

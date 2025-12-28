@@ -1,5 +1,3 @@
-use std::io::BufRead;
-
 use serde::{ser, Serialize};
 
 use crate::error::{Error, Result};
