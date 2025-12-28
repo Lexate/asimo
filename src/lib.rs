@@ -1,10 +1,20 @@
+#[expect(unused)]
 mod gen_types;
-pub use crate::gen_types::types;
+pub use crate::gen_types::{Commands, Types};
+mod type_methods;
+
+mod error;
+pub use error::{Error, Result};
+mod ser;
+pub use ser::{to_bytes, Serializer};
+mod de;
+pub use de::{from_bytes, Deserializer};
 
 pub mod comms {
-    use std::time::Duration;
-
+    use crate::{to_bytes, type_methods::Hcp};
+    use serde::{Deserialize, Serialize};
     use serialport::SerialPort;
+    use std::time::Duration;
 
     pub struct Serial {
         port: Box<dyn SerialPort>,
@@ -21,27 +31,29 @@ pub mod comms {
             Ok(Self { port })
         }
 
-        pub fn write(&mut self, output: &[u8]) -> Result<usize, std::io::Error> {
-            self.port.write(&output[..])
+        fn send(&mut self, message: Vec<u8>) -> Result<Vec<u8>, std::io::Error> {
+            self.port.write_all(&message[..])?;
+
+            let mut buf = vec![0u8; 256];
+            loop {
+                match self.port.read(buf.as_mut_slice()) {
+                    Ok(t) => return Ok(buf[..t].to_vec()),
+                    Err(ref e) if e.kind() == std::io::ErrorKind::TimedOut => (),
+                    Err(e) => eprintln!("{:?}", e),
+                }
+            }
         }
 
-        pub fn read(&mut self) -> Result<(usize, Vec<u8>), std::io::Error> {
-            let mut serial_buf: Vec<u8> = vec![0; 256];
-            let bytes_written = self.port.read(serial_buf.as_mut_slice())?;
-            Ok((bytes_written, serial_buf))
-        }
-
-        pub fn write_read(&mut self, output: &[u8]) -> Result<Vec<u8>, std::io::Error> {
-            self.write(output)?;
-            let (_, response) = self.read()?;
-
-            Ok(response)
-        }
+        // pub fn send_message<T>(&mut self, message: &T) -> Result<T, std::io::Error>
+        // where
+        //     T: Hcp + Serialize + Deserialize,
+        // {
+        //     let response = to_bytes(message)?
+        // }
     }
 }
 
 pub mod proto {
-    use crate::gen_types::types::*;
     const CRC_TABLE: [u8; 256] = [
         0, 94, 188, 226, 97, 63, 221, 131, 194, 156, 126, 32, 163, 253, 31, 65, 157, 195, 33, 127,
         252, 162, 64, 30, 95, 1, 227, 189, 62, 96, 130, 220, 35, 125, 159, 193, 66, 28, 254, 160,
@@ -58,116 +70,104 @@ pub mod proto {
         246, 168, 116, 42, 200, 150, 21, 75, 169, 247, 182, 232, 10, 84, 215, 137, 107, 53,
     ];
 
-    fn calc_crc(array: &Vec<u8>, start: usize) -> u8 {
+    pub fn calc_crc(array: &[u8], start: usize) -> u8 {
         let mut crc = 0;
         for i in &array[start..] {
             crc = CRC_TABLE[(crc ^ i) as usize]
         }
         crc
     }
+}
 
-    struct AmProto {
-        msgtype: u8,
-        subcmd: u8,
-        payload: inParams,
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn serialize_setsoundtype() {
+        let command = Commands::Sound::SetSoundType::inParams {
+            soundType: Types::tSoundType::SOUND_CLICK,
+        };
+        assert_eq!(
+            to_bytes(&command).unwrap(),
+            vec![0x02, 0x81, 0x08, 0x00, 0x00, 0x90, 0xac, 0x02, 0x00, 0x01, 0x3e, 0x03]
+        )
     }
 
-    impl AmProto {
-        fn to_byte_array(&self) -> Vec<u8> {
-            let mut array = Vec::new();
-
-            array.push(0x02); // STX
-            array.push(self.msgtype); // msgtype
-                                      // length, (added later)
-            array.push(self.subcmd); // subcmd
-            array.append(self.payload.to_byte_array().as_mut());
-            array.insert(2, (array.len() - 2) as u8); //length, -2 to skip STX and msgtype
-            array.push(calc_crc(&array, 1)); //crc, 1 to skip STX
-            array.push(0x03); // ETX
-
-            array
-        }
-        fn new(command: inParams) -> Self {
-            let (msgtype, subcmd) = get_msgtype(command);
-            Self {
-                msgtype: msgtype.try_into().expect("amg3 command sent to amproto"),
-                subcmd,
-                payload: command,
-            }
-        }
+    #[test]
+    fn serialize_deviceid() {
+        let command = Commands::DeviceInformation::GetDeviceIdentification::inParams {};
+        assert_eq!(
+            to_bytes(&command).unwrap(),
+            vec![0x2, 0x16, 0x1, 0x0, 0x5f, 0x3]
+        );
     }
 
-    struct Amg3 {
-        id: u8,
-        //length: u16,
-        trans_id: u8,
-        message_type: u16, // Can be u8 if the first byte is larger than 0x7F
-        subcmd: u8,
-        //payload_length: u8,
-        payload: inParams,
-        //crc: u8,
+    #[test]
+    fn deserialize_deviceid() {
+        let message = [
+            0x2, 0x17, 0x8, 0x0, 0xa, 0x8, 0x51, 0xda, 0x6c, 0xa, 0x0, 0xd8, 0x3,
+        ];
+        let response: Commands::DeviceInformation::GetDeviceIdentification =
+            from_bytes(&message).unwrap();
+        let expected = Commands::DeviceInformation::GetDeviceIdentification::outParams {
+            deviceTypeGroup: Types::tDeviceTypeGroup::DEVICE_TYPE_GROUP_MOWER,
+            mowerDeviceType: Types::tMowerDeviceType::MOWER_DEVICE_TYPE_I,
+            mowerSerialNo: 174905937,
+            mowerVariantType: Types::tMowerVariantType::MOWER_VARIANT_TYPE_ORG,
+        };
+
+        assert_eq!(response, expected);
+        println!("{:?}", response);
     }
 
-    impl Amg3 {
-        fn to_byte_array(&self) -> Vec<u8> {
-            let mut array = Vec::new();
+    #[test]
+    fn deserialize_setsoundtype() {
+        let message = [
+            0x2, 0x81, 0x8, 0x0, 0x0, 0x90, 0xad, 0x2, 0x0, 0x1, 0xb1, 0x3,
+        ];
+        let response: Commands::Sound::SetSoundType = from_bytes(&message).unwrap();
 
-            array.push(0x02); // Stx
-            array.push(self.id); // Id
-                                 // length
-            array.push(self.trans_id); // Transision id
-            array.extend_from_slice(self.message_type.to_be_bytes().as_slice()); // is all of amproto BE hopefully not because then i have more work to do
+        let expected = Commands::Sound::SetSoundType::outParams {
+            soundType: Types::tSoundType::SOUND_CLICK,
+        };
 
-            let mut payload = self.payload.to_byte_array();
-            array.push((payload.len() as u8) + 1); // Payload length, add 1 for subcmd
-            array.push(self.subcmd); // subcmd
-            array.append(payload.as_mut()); // Payload
+        println!("{:?}", response);
 
-            array.splice(2..2, (array.len() as u16).to_le_bytes()); // Length
-
-            array.push(calc_crc(&array, 1)); // Crc
-            array.push(0x03); // ETX
-
-            array
-        }
-        fn new(command: inParams) -> Self {
-            let (message_type, subcmd) = get_msgtype(command);
-            Self {
-                id: 0x81,    // this seems to always be 0x81
-                trans_id: 0, // this always seems to be 0 for some reason
-                message_type: message_type | 0x8000,
-                subcmd,
-                payload: command,
-            }
-        }
+        assert_eq!(response, expected);
     }
 
-    impl inParams {
-        fn to_byte_array(&self) -> Vec<u8> {
-            match *self {
-                inParams::SystemSettingsSetHeadlightEnabled(p) => vec![p],
-                inParams::WheelsGetSpeed(p) => vec![p],
-                inParams::WheelsGetRotationCounter(p) => vec![p],
-                inParams::LoopSamplerGetLoopSignalMaster(p) => vec![p as u8],
-                inParams::HardwareControlWheelMotorsPower(p, q) => {
-                    [p.to_le_bytes(), q.to_le_bytes()].concat()
-                }
-                inParams::MowerAppSetMode(p) => vec![p as u8],
-                inParams::SystemSettingsSetLoopDetection(p) => vec![p],
-                inParams::HeightMotorSetHeight(p) => vec![p],
-                inParams::CollisionSetSimulation(p) => vec![p as u8],
-                inParams::CollisionSetSimulatedStatus(p) => Vec::from(p.to_le_bytes()),
-                inParams::SoundSetSoundType(p) => vec![p as u8],
-                _ => Vec::new(),
-            }
-        }
-    }
-
-    pub fn encode(command: inParams) -> (Vec<u8>, u8) {
-        let (msgtype, subcmd) = get_msgtype(command);
-        match msgtype {
-            4000.. => (Amg3::new(command).to_byte_array(), subcmd),
-            _ => (AmProto::new(command).to_byte_array(), subcmd),
-        }
+    #[test]
+    fn deserialize_getsafetysupervisor() {
+        let message = [
+            0x2, 0x81, 0x1c, 0x0, 0x0, 0x91, 0x73, 0x16, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x52, 0x3,
+        ];
+        let response: Commands::SafetySupervisor::GetStatus = from_bytes(&message).unwrap();
+        let expected = Commands::SafetySupervisor::GetStatus::outParams {
+            stopButtonPressed: false,
+            onOffSwitchInactive: false,
+            lifted: false,
+            upsideDown: false,
+            tooMuchTilt: false,
+            collision3s: false,
+            tooFarOutsideBoundary: false,
+            noLoopSignalWheels: false,
+            pinCodeNeeded: false,
+            twoSeperateActionsNeededBlade: false,
+            twoSeperateActionsNeededWheels: false,
+            warningSoundNeeded: true,
+            chargingOngoing: false,
+            noLoopSignalBlade: false,
+            collisionIsActive: false,
+            memNotValidated: false,
+            blade10sLift: false,
+            blade10sTilt: false,
+            blade10sCollision: false,
+            bladeUpSideDown: false,
+            powerModeLedBroken: false,
+        };
+        assert_eq!(response, expected);
     }
 }
